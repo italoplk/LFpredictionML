@@ -20,6 +20,10 @@ random.seed(42)
 
 import itertools
 
+
+from iterating_over_dataset import loop_dataset, reconstruct, train, test
+
+
 def random_split_n(data, kfolds):
     random.shuffle(data)
     folds = [ data[foldk::kfolds] for foldk in range(kfolds) ]
@@ -34,20 +38,25 @@ with open("chosen_list.txt", "r") as foldfile:
     folds = json.loads(foldfile.read())
 #print(folds)
 
-from iterating_over_dataset import loop_dataset, reconstruct, train, test
+
 import torch.nn as nn
 
-epochs = 10
+epochs = 20
+configSaida = '2x2NoDrop.txt'
+
 
 #from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
 
-from space_model_noMax_8l import UNetSpace
+from space_model_noMax_smallerKernel_8l import UNetSpace
 
 lossf = nn.MSELoss()
 
 import sys
 batches = (160,) 
 print(batches)
+#print(os.listdir('/scratch/Decoded_LFs/png/decoded_32_noPartition'))
+#print(os.listdir('/scratch/Original_LFs/png'))
+
 for batch in batches:
     print(batch)
     ##for i, (training, validation) in enumerate(folds):
@@ -65,14 +74,14 @@ for batch in batches:
         for era in range(1,epochs+1):
             f = loop_dataset(functools.partial(train, model, lossf, optimizer, batch_size=10, u=2), training)
             if (era % 20 == 0):
-                print(f"{era}\t{f}", end='', file=open('output.txt', 'a'))
+                print(f"{era}\t{f}", end='', file=open('/scratch/'+ configSaida, 'a'))
                 folder = f"{model_name}_examples/{era}/"
                 os.makedirs(folder, exist_ok=True)
                 val = loop_dataset(functools.partial(reconstruct, model, folder), validation[:2])
-                print(f'\t{val}', file=open('output.txt', 'a'))
+                print(f'\t{val}', file=open('/scratch/'+ configSaida, 'a'))
             else:
-                print(f"{era}\t{f}", file=open('output.txt', 'a'))
-        
+                print(f"{era}\t{f}", file=open('/scratch/'+ configSaida, 'a'))
+
 # In[ ]:
 
 

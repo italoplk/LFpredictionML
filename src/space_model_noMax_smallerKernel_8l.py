@@ -18,34 +18,36 @@ class UNetSpace(nn.Module):
         deflatener = Rearrange('b c (u s) (v t) -> b c u v s t', u=u, v=v)
         flat_model = UNetLike([
             nn.Sequential(#10 chanels arbitrary
-                preserving_dimensions(Conv2d, 6, 10), nn.Dropout(), nn.PReLU()  # 10, 416, 416
+                preserving_dimensions(Conv2d, 6, 10), nn.PReLU()  # 10, 416, 416
             ),
             nn.Sequential(
-                Conv2d(10, 10, (4,4), 4), nn.Dropout(), nn.PReLU(),  # 10, 104, 104
+                Conv2d(10, 10, (4,4), 4),  nn.PReLU(),  # 10, 208, 208
                 # preserving_dimensions(Conv2d, 10, 10), nn.Dropout(), nn.PReLU()
             ),
             nn.Sequential(
 
-                Conv2d(10, 10, (4, 4), 4), nn.Dropout(), nn.PReLU(),  # 10, 26, 26
-                Conv2d(10, 10, (3, 3), 1), nn.Dropout(), nn.PReLU(),  # 10, 24, 24
+                Conv2d(10, 10, (4, 4), 2), nn.PReLU(),  # 10, 104, 104
+
                 # preserving_dimensions(Conv2d, 10, 10), nn.Dropout(), nn.PReLU()
             ),
             nn.Sequential(
-                Conv2d(10, 10, (4, 4), 4), nn.Dropout(), nn.PReLU(),  # 10, 6, 6
+                Conv2d(10, 10, (4, 4), 4),  nn.PReLU(),  # 10, 52, 52
             ),
 
         ], [
 
             nn.Sequential(
 
-                Repeat('b c x y -> b c (x dx) (y dy)', dx=4, dy=4),  # 10, 24, 24
+                Repeat('b c x y -> b c (x dx) (y dy)', dx=2, dy=2),  # 10, 104, 104
+                ConvTranspose2d(10, 10, (4, 4)), nn.PReLU(),
+
 
 
             ),
             nn.Sequential(  # 10, 40, 40
 
-                ConvTranspose2d(10, 10, (3, 3)), nn.Dropout(), nn.PReLU(),  # 10, 26, 26
-                Repeat('b c x y -> b c (x dx) (y dy)', dx=4, dy=4),  # 10, 416, 416
+                ConvTranspose2d(10, 10, (4, 4)), nn.PReLU(),  #
+                Repeat('b c x y -> b c (x dx) (y dy)', dx=4, dy=4),  # 10, 208, 208
 
 
             ),
@@ -54,7 +56,7 @@ class UNetSpace(nn.Module):
                 Repeat('b c x y -> b c (x dx) (y dy)', dx=4, dy=4),  # 10, 416, 416
 
 
-                 preserving_dimensions(Conv2d, 10, 10), nn.Dropout(), nn.PReLU(),
+                 preserving_dimensions(Conv2d, 10, 10), nn.PReLU(),
             ),
             nn.Sequential(
                 preserving_dimensions(Conv2d, 10, 1)
@@ -77,7 +79,7 @@ class UNetSpace(nn.Module):
         X = self.blocker(X)[:, :3, :, :, :, :]
         d, u, l = X[:, :1, :, :, :, :], X[:, 1:2, :, :, :, :], X[:, 2:3, :, :, :, :]
         flipped = map(flip, (d, u, l), ((-2, -1), (-2,), (-1,)))
-        X = torch.concatenate((X, *flipped), dim=1)
+        X = torch.cat((X, *flipped), dim=1)
         # print(X.shape)
         return self.f(X)
 
