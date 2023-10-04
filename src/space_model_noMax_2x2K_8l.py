@@ -34,12 +34,32 @@ class UNetSpace(nn.Module):
                 Conv2d(10, 10, (2, 2), 2),  nn.PReLU(),  # 10, 52, 52
             ),
 
+            nn.Sequential(
+                Conv2d(10, 10, (2, 2), 2), nn.PReLU(),  # 10, 26, 26
+
+            ),
+
+            nn.Sequential(
+                Conv2d(10, 10, (2, 2), 2), nn.PReLU(),  # 10, 13, 13
+
+            ),
+
         ], [
 
             nn.Sequential(
                 preserving_dimensions(Conv2d, 10, 10), nn.PReLU(),
                 Repeat('b c x y -> b c (x dx) (y dy)', dx=2, dy=2),  # 10, 104, 104
 
+
+            ),
+            nn.Sequential(
+                preserving_dimensions(Conv2d, 10, 10), nn.PReLU(),
+                Repeat('b c x y -> b c (x dx) (y dy)', dx=2, dy=2),  # 10, 104, 104
+
+            ),
+            nn.Sequential(
+                preserving_dimensions(Conv2d, 10, 10), nn.PReLU(),
+                Repeat('b c x y -> b c (x dx) (y dy)', dx=2, dy=2),  # 10, 104, 104
 
             ),
             nn.Sequential(  # 10, 40, 40
@@ -52,8 +72,6 @@ class UNetSpace(nn.Module):
             nn.Sequential(  # 10, 204, 204
 
                 Repeat('b c x y -> b c (x dx) (y dy)', dx=2, dy=2),  # 10, 416, 416
-
-
                  preserving_dimensions(Conv2d, 10, 10), nn.PReLU(),
             ),
             nn.Sequential(
