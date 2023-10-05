@@ -41,13 +41,13 @@ with open("chosen_list.txt", "r") as foldfile:
 
 import torch.nn as nn
 
-epochs = 20
-configSaida = '2x2NoDrop.txt'
+epochs = 100
+configSaida = '4knoDropoutnoMP.txt'
 
 
 #from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
 
-from space_model_noMax_smallerKernel_8l import UNetSpace
+from space_model_noMax_8l import UNetSpace
 
 lossf = nn.MSELoss()
 

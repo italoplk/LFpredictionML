@@ -18,43 +18,42 @@ class UNetSpace(nn.Module):
         deflatener = Rearrange('b c (u s) (v t) -> b c u v s t', u=u, v=v)
         flat_model = UNetLike([
             nn.Sequential(#10 chanels arbitrary
-                preserving_dimensions(Conv2d, 6, 10), nn.Dropout(), nn.PReLU()  # 10, 416, 416
+                preserving_dimensions(Conv2d, 6, 10),  nn.PReLU()  # 10, 416, 416
             ),
             nn.Sequential(
-                Conv2d(10, 10, (4,4), 4), nn.Dropout(), nn.PReLU(),  # 10, 104, 104
+                Conv2d(10, 10, (4,4), 4),  nn.PReLU(),  # 10, 104, 104
                 # preserving_dimensions(Conv2d, 10, 10), nn.Dropout(), nn.PReLU()
             ),
             nn.Sequential(
 
-                Conv2d(10, 10, (4, 4), 4), nn.Dropout(), nn.PReLU(),  # 10, 26, 26
-                Conv2d(10, 10, (3, 3), 1), nn.Dropout(), nn.PReLU(),  # 10, 24, 24
+                Conv2d(10, 10, (4, 4), 4),  nn.PReLU(),  # 10, 26, 26
+                #Conv2d(10, 10, (3, 3), 1), nn.Dropout(), nn.PReLU(),  # 10, 24, 24
                 # preserving_dimensions(Conv2d, 10, 10), nn.Dropout(), nn.PReLU()
             ),
             nn.Sequential(
-                Conv2d(10, 10, (4, 4), 4), nn.Dropout(), nn.PReLU(),  # 10, 6, 6
+                Conv2d(10, 10, (4, 4), 4),  nn.PReLU(),  # 10, 6, 6
             ),
 
         ], [
 
             nn.Sequential(
-
+                preserving_dimensions(Conv2d, 10, 10),  nn.PReLU(),
                 Repeat('b c x y -> b c (x dx) (y dy)', dx=4, dy=4),  # 10, 24, 24
+                ConvTranspose2d(10, 10, (3, 3)), nn.PReLU()
 
 
             ),
             nn.Sequential(  # 10, 40, 40
 
-                ConvTranspose2d(10, 10, (3, 3)), nn.Dropout(), nn.PReLU(),  # 10, 26, 26
+                preserving_dimensions(Conv2d, 10, 10), nn.PReLU(),
                 Repeat('b c x y -> b c (x dx) (y dy)', dx=4, dy=4),  # 10, 416, 416
 
 
             ),
             nn.Sequential(  # 10, 204, 204
-
+                preserving_dimensions(Conv2d, 10, 10),  nn.PReLU(),
                 Repeat('b c x y -> b c (x dx) (y dy)', dx=4, dy=4),  # 10, 416, 416
 
-
-                 preserving_dimensions(Conv2d, 10, 10), nn.Dropout(), nn.PReLU(),
             ),
             nn.Sequential(
                 preserving_dimensions(Conv2d, 10, 1)
