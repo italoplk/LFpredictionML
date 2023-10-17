@@ -81,6 +81,7 @@ def write_LF_PMG(image, path):
 
 def read_LF(path):
     img = read_LF_PNG(path)
+    #do grey scale outside
     img_ycbcr = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
     img_normalized = normalize_16bit_image(img_ycbcr)
     try:
@@ -107,7 +108,7 @@ class pairwise_lister:
         self.original_lfs = { tuple(path.split("/")[-2:]) : path for path in self.original_paths}
         #print(self.original_paths)
         self.decoded_lfs = { tuple(path.split("/")[-3:]) : path for path in self.decoded_paths}
-        print('Original LFs::::', self.original_lfs)
+        #print('Original LFs::::', self.original_lfs)
         self.errs = [tuple(key[:2]) for key in self.decoded_lfs if (key[0], key[1] + '.png') not in self.original_lfs]
         #print(self.errs)
 

@@ -40,25 +40,30 @@ with open("chosen_list.txt", "r") as foldfile:
 
 
 import torch.nn as nn
+from space_model_noMax_8l_32in64out import UNetSpace
 
-epochs = 100
-configSaida = '4knoDropoutnoMP.txt'
+epochs = 1000
+configSaida = '4kLR5_noMPnoDR_HBPP_B10_32in64out.txt'
 
 
 #from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
 
-from space_model_noMax_8l import UNetSpace
+
 
 lossf = nn.MSELoss()
 
 import sys
-batches = (160,) 
-print(batches)
+batches = (10,)
+print('batch: ', batches)
 #print(os.listdir('/scratch/Decoded_LFs/png/decoded_32_noPartition'))
 #print(os.listdir('/scratch/Original_LFs/png'))
 
+
+
 for batch in batches:
+
     print(batch)
+    print(f"modelname: pace8_B{batch}_{configSaida}", file=open('/scratch/' + configSaida, 'w'))
     ##for i, (training, validation) in enumerate(folds):
     for i, (training, validation) in enumerate(folds):
         #if i == 0: continue
@@ -70,7 +75,7 @@ for batch in batches:
 
         
         
-        optimizer = optim.Adam(model.parameters(), lr = 1e-4)
+        optimizer = optim.Adam(model.parameters(), lr = 1e-5)
         for era in range(1,epochs+1):
             f = loop_dataset(functools.partial(train, model, lossf, optimizer, batch_size=10, u=2), training)
             if (era % 20 == 0):
@@ -81,6 +86,9 @@ for batch in batches:
                 print(f'\t{val}', file=open('/scratch/'+ configSaida, 'a'))
             else:
                 print(f"{era}\t{f}", file=open('/scratch/'+ configSaida, 'a'))
+
+            # if (era % 10 == 0):
+            #     test = loop_dataset(functools.partial(test, model, lossf, optimizer),test)
 
 # In[ ]:
 

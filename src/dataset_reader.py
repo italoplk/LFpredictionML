@@ -107,7 +107,6 @@ class pairwise_lister:
         self.original_lfs = { tuple(path.split("/")[-2:]) : path for path in self.original_paths}
         #print(self.original_paths)
         self.decoded_lfs = { tuple(path.split("/")[-3:]) : path for path in self.decoded_paths}
-        print('Original LFs::::', self.original_lfs)
         self.errs = [tuple(key[:2]) for key in self.decoded_lfs if (key[0], key[1] + '.png') not in self.original_lfs]
         #print(self.errs)
         self.pairs = {
@@ -149,9 +148,9 @@ class fold_dataset:
         return (self[i] for i in sample(range(len(self)), n))
 
 
-training_dataset = pairwise_lister("/scratch/Original_LFs/png", "/scratch/Decoded_LFs/png/decoded_32_noPartition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
+training_dataset = pairwise_lister("/scratch/Original_LFs/png", "/scratch/HBPP/", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
 
-test_dataset = pairwise_lister("/scratch/Original_LFs/png", "/scratch/Decoded_LFs/png/decoded_32_noPartition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = False)
+test_dataset = pairwise_lister("/scratch/Original_LFs/png", "/scratch/HBPP/", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = False)
 
 
 

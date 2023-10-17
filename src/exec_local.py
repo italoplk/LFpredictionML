@@ -23,6 +23,7 @@ random.seed(42)
 import itertools
 
 from iterating_over_dataset_local import loop_dataset, reconstruct, train, test
+from dataset_reader import test_dataset
 import torch.nn as nn
 
 
@@ -42,14 +43,14 @@ with open("chosen_list.txt", "r") as foldfile:
 
 
 
-epochs = 100
+epochs = 10
 
-configSaida = '4x4NoDrop.txt'
+configSaida = 'test.txt'
 
 #from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
 
 #from space_model_noMax_smallerKernel_8l import UNetSpace
-from space_model_noDrop_8l import UNetSpace
+from space_model_noMax_8l import UNetSpace
 
 if(not torch.cuda.is_available()):
     print(torch.cuda.is_available())
@@ -58,7 +59,7 @@ if(not torch.cuda.is_available()):
 lossf = nn.MSELoss()
 
 import sys
-batches = (160,) 
+batches = (10,)
 print(batches)
 #print(os.listdir('/scratch/Decoded_LFs/png/decoded_32_noPartition'))
 #print(os.listdir('/scratch/Original_LFs/png'))
@@ -67,19 +68,21 @@ for batch in batches:
     print(batch)
     ##for i, (training, validation) in enumerate(folds):
     for i, (training, validation) in enumerate(folds):
+        print(validation)
         #if i == 0: continue
         model_name = f"space8_batch_{batch}_{i}"
         model = UNetSpace(model_name)
         model.cuda()
         print(sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-
-        
         
         optimizer = optim.Adam(model.parameters(), lr = 1e-4)
+
+
+
         for era in range(1, epochs+1):
             f = loop_dataset(functools.partial(train, model, lossf, optimizer, batch_size=10, u=2), training)
-            if (era % 20 == 0):
+            if (era % 10 == 0):
                 print(f"{era}\t{f}", end='', file=open(configSaida, 'a'))
                 folder = f"{model_name}_examples/{era}/"
                 os.makedirs(folder, exist_ok=True)
@@ -87,6 +90,10 @@ for batch in batches:
                 print(f'\t{val}', file=open(configSaida, 'a'))
             else:
                 print(f"{era}\t{f}", file=open(configSaida, 'a'))
+
+            # if era % 1 == 0:
+
+
         
 # In[ ]:
 

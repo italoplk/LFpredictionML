@@ -64,6 +64,8 @@ class UNetSpace(nn.Module):
     
     def save(self):
         torch.save(self.state_dict(), self.name)
+
+    #IDM take out flip
     def forward(self, X):
         flip = torch.flip
         X = self.blocker(X)[:, :3, :, :, :, :]
