@@ -18,7 +18,7 @@ class UNetSpace(nn.Module):
         deflatener = Rearrange('b c (u s) (v t) -> b c u v s t', u=u, v=v)
         flat_model = UNetLike([
             nn.Sequential(#10 chanels arbitrary
-                preserving_dimensions(Conv2d, 6, 32),  nn.PReLU()  # 10, 416, 416
+                preserving_dimensions(Conv2d, 3, 32),  nn.PReLU()  # 10, 416, 416
             ),
             nn.Sequential(
                 Conv2d(32, 64, (4,4), 4),  nn.PReLU(),  # 10, 104, 104
@@ -75,9 +75,9 @@ class UNetSpace(nn.Module):
         flip = torch.flip
         X = self.blocker(X)[:, :3, :, :, :, :]
         d, u, l = X[:, :1, :, :, :, :], X[:, 1:2, :, :, :, :], X[:, 2:3, :, :, :, :]
-        flipped = map(flip, (d, u, l), ((-2, -1), (-2,), (-1,)))
-        X = torch.cat((X, *flipped), dim=1)
-        # print(X.shape)
+        # flipped = map(flip, (d, u, l), ((-2, -1), (-2,), (-1,)))
+        # X = torch.cat((X, *flipped), dim=1)
+        print(X.shape)
         return self.f(X)
 
 
