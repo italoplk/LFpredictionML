@@ -40,11 +40,9 @@ with open("chosen_list.txt", "r") as foldfile:
 
 
 import torch.nn as nn
-from space_model_noMax_8l_32in64out import UNetSpace
+from space_model_noMax_8l_32in64out_correctingKernels_L1K2x2 import UNetSpace
 
 epochs = 1000
-configSaida = '4kLR5_noMPnoDR_HBPP_B10_32in64out.txt'
-
 
 #from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
 
@@ -54,28 +52,31 @@ lossf = nn.MSELoss()
 
 import sys
 batches = (10,)
+lr = 1e-5
 print('batch: ', batches)
+
+
 #print(os.listdir('/scratch/Decoded_LFs/png/decoded_32_noPartition'))
 #print(os.listdir('/scratch/Original_LFs/png'))
 
 
 
+
 for batch in batches:
 
+    configSaida = f"space_8_correctedFolds_L1-2k_4k_noMPnoDR_HBPP_32in64ou_B{batch}_LR{lr}.txt"
     print(batch)
-    print(f"modelname: pace8_B{batch}_{configSaida}", file=open('/scratch/' + configSaida, 'w'))
+    print(f"modelname: {configSaida}", file=open('/scratch/' + configSaida, 'w'))
     ##for i, (training, validation) in enumerate(folds):
     for i, (training, validation) in enumerate(folds):
         #if i == 0: continue
-        model_name = f"space8_batch_{batch}_{i}"
+        model_name = f"{configSaida}_{i}"
         model = UNetSpace(model_name)
         model.cuda()
         print(sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 
-        
-        
-        optimizer = optim.Adam(model.parameters(), lr = 1e-5)
+        optimizer = optim.Adam(model.parameters(), lr)
         for era in range(1,epochs+1):
             f = loop_dataset(functools.partial(train, model, lossf, optimizer, batch_size=10, u=2), training)
             if (era % 20 == 0):
@@ -90,6 +91,6 @@ for batch in batches:
             # if (era % 10 == 0):
             #     test = loop_dataset(functools.partial(test, model, lossf, optimizer),test)
 
-# In[ ]:
+    model.save()
 
 

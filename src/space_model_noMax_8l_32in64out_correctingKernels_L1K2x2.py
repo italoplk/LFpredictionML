@@ -6,6 +6,7 @@ import os.path
 
 #from torchsummary import summary
 
+
 from unetlike import UNetLike, preserving_dimensions, Repeat
 
 
@@ -20,46 +21,47 @@ class UNetSpace(nn.Module):
             nn.Sequential(#10 chanels arbitrary
                 preserving_dimensions(Conv2d, 6, 32),  nn.PReLU()  # 10, 416, 416
             ),
+
             nn.Sequential(
                 Conv2d(32, 64, (2,2), 2),  nn.PReLU(),  # 10, 208, 208
                 # preserving_dimensions(Conv2d, 10, 10), nn.Dropout(), nn.PReLU()
-            nn.Sequential(
             ),
+
+            nn.Sequential(
 
                 Conv2d(64, 128, (4, 4), 4),  nn.PReLU(),  # 10, 52, 52
                 #Conv2d(10, 10, (3, 3), 1), nn.Dropout(), nn.PReLU(),  # 10, 24, 24
                 # preserving_dimensions(Conv2d, 10, 10), nn.Dropout(), nn.PReLU()
             ),
+
             nn.Sequential(
                 Conv2d(128, 256, (4, 4), 4),  nn.PReLU(),  # 10, 13, 13
+
             ),
 
         ], [
 
             nn.Sequential(
 
-
                 preserving_dimensions(Conv2d, 256, 128), nn.PReLU(), #13, 13
                 Repeat('b c x y -> b c (x dx) (y dy)', dx=4, dy=4),  # 10, 52, 52
 
-
-
             ),
-            nn.Sequential(  # 10, 40, 40
+            nn.Sequential(
+
 
                 preserving_dimensions(Conv2d, 128, 64), nn.PReLU(),
-                # Repeat('b c x y -> b c (x dx) (y dy)', dx=4, dy=4),  # 10, 104, 104
-                Repeat('b c x y -> b c (x dx) (y dy)', dx=4, dy=4),  # 10, 52, 52
-
-
-            ),
-            nn.Sequential(  # 10, 204, 204
-                preserving_dimensions(Conv2d, 64, 32),  nn.PReLU(),
                 Repeat('b c x y -> b c (x dx) (y dy)', dx=4, dy=4),  # 10, 208, 208
+
 
             ),
             nn.Sequential(
-                Repeat('b c x y -> b c (x dx) (y dy)', dx=2, dy=2),  # 10, 416, 416
+
+                preserving_dimensions(Conv2d, 64, 32), nn.PReLU(),
+                Repeat('b c x y -> b c (x dx) (y dy)', dx=2, dy=2),  # 10, 208, 208
+
+            ),
+            nn.Sequential(
                 preserving_dimensions(Conv2d, 32, 1) #416, 416
             )
         ], compose=lambda x, y: x + y)
@@ -84,7 +86,6 @@ class UNetSpace(nn.Module):
         # print(X.shape)
         return self.f(X)
 
-
 model = UNetSpace("unet_space")
 model.eval()
 zeros = torch.zeros(1, 1, 13, 13, 64, 64)
@@ -95,4 +96,5 @@ with torch.no_grad():
     x = model(zeros)
     print(x.shape)
     print(lossf(zeros_t, x))
-    #print(summary(model, zeros))
+    # print(summary(model, zeros))
+

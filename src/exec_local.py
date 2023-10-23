@@ -50,7 +50,7 @@ configSaida = 'test.txt'
 #from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
 
 #from space_model_noMax_smallerKernel_8l import UNetSpace
-from space_model_noMax_8l_32in64out import UNetSpace
+from space_model_noMax_8l_32in64out_correctingKernels_L1K2x2 import UNetSpace
 
 if(not torch.cuda.is_available()):
     print(torch.cuda.is_available())
