@@ -87,5 +87,5 @@ with torch.no_grad():
     x = model(zeros)
     print(x.shape)
     print(lossf(zeros_t, x))
-    print(summary(model, zeros))
+    #print(summary(model, zeros))
 

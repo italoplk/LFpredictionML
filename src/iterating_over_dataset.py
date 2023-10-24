@@ -48,9 +48,11 @@ def train(model, lossf, optimizer, original, decoded, *lf, batch_size=1, u=0):
         i += inpt.shape[0]
         # print(inpt.shape)
         # print(yt.shape)
-        inpt = inpt.cuda()
+        if torch.cuda.is_available():
+            inpt = inpt.cuda()
         y = model(inpt)
-        yt = yt.cuda()
+        if torch.cuda.is_available():
+            yt = yt.cuda()
         err = lossf(yt[:, :, :, :, 32:, 32:], y)
         if k == u:
             err.backward()
@@ -95,11 +97,13 @@ def reconstruct(model, prefix, original, decoded, lf, bpp):
     model.eval()
     reconstruc = reconstructor(original.shape, 32)
     for inpt, yt in DataLoader(loader, batch_size=10, num_workers=2, prefetch_factor=5, persistent_workers=True):
-        y = model(inpt.cuda())
+        y = model(inpt.cuda() if torch.cuda.is_available() else inpt)
         # y = model(inpt)
         blocks = y
         # err = lossf(yt[:,:,:,:,32:,32:].cuda(), blocks).item()
-        err = lossf(yt[:, :, :, :, 32:, 32:].cuda(), blocks).item()
+        yt = yt[:, :, :, :, 32:, 32:]
+        yt = yt.cuda() if torch.cuda.is_available() else yt
+        err = lossf(yt, blocks).item()
         reconstruc.add_blocks(blocks.cpu().detach().numpy())
         acc += err
         i += y.shape[0]

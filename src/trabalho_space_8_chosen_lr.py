@@ -5,6 +5,7 @@
 #torch.concat((torch.zeros(1,2,3), torch.zeros(1,2,3)), axis=1).shape
 
 import os
+import torch
 from torch.utils.data import DataLoader, RandomSampler
 
 
@@ -53,7 +54,8 @@ for lr in lrs:
         if i == 0: continue
         model_name = f"space8_lr_{lr}_{i}"
         model = UNetSpace(model_name)
-        model.cuda()
+        if torch.cuda.is_available():
+            model.cuda()
         optimizer = optim.Adam(model.parameters(), lr = lr)
         for era in range(1, epochs+1):
             f = loop_dataset(functools.partial(train, model, lossf, optimizer, batch_size = 10), training)
