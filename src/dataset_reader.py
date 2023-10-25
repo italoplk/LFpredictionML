@@ -129,8 +129,9 @@ class pairwise_lister:
     def read_pair(self, lfclass, lf):
         try:
             bpps = self.bbps[lfclass, lf]
-        except KeyError
-            bpps = self.bbps[lfclass, lf.replace("___", "_&_")]
+        except KeyError:
+            lf = lf.replace("___", "_&_")
+            bpps = self.bbps[lfclass, lf]
         bpps = list(bpps)
         shuffle(bpps)
         original = single(self.read_original_mat, (lfclass, lf))

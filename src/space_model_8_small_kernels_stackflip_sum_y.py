@@ -73,7 +73,7 @@ class UNetSpace(nn.Module):
         X = self.blocker(X)[:, :3, :, :, :, :]
         d, u, l = X[:, :1, :, :, :, :], X[:, 1:2, :, :, :, :], X[:, 2:3, :, :, :, :]
         flipped = map(flip, (d, u, l), ((-2,-1), (-2,), (-1,)))
-        X = torch.concatenate((X, *flipped), dim = 1)
+        X = torch.cat((X, *flipped), dim = 1)
         #print(X.shape)
         return self.f(X)
 
