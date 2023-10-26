@@ -9,7 +9,9 @@ from torch.utils.data import DataLoader, RandomSampler
 lfloader = functools.partial(DataLoader, batch_size=1, num_workers=1, persistent_workers=True)
 
 make_dataloader = functools.partial(DataLoader, batch_size=5, num_workers=2, prefetch_factor=1, persistent_workers=True)
-
+def block_MSE_by_view(yt, yc):
+    diff = yt - yc
+    return torch.einsum('bcuvst,bcuvst->uv', diff, diff) / (diff.shape[-1] * diff.shape[-2])
 
 def loop_dataset(action, lfs):
     acc = 0
@@ -44,6 +46,7 @@ def train(model, lossf, optimizer, original, decoded, *lf, batch_size=1, u=0):
     model.train()
     i = 0
     k = 0
+    acc_MSE_by_view = 0
     for inpt, yt in make_dataloader(loader, batch_size=batch_size):
         i += inpt.shape[0]
         # print(inpt.shape)
@@ -51,9 +54,12 @@ def train(model, lossf, optimizer, original, decoded, *lf, batch_size=1, u=0):
         if torch.cuda.is_available():
             inpt = inpt.cuda()
         y = model(inpt)
+        yt = yt[:, :, :, :, 32:, 32:]
         if torch.cuda.is_available():
             yt = yt.cuda()
-        err = lossf(yt[:, :, :, :, 32:, 32:], y)
+        err = lossf(yt, y)
+
+        acc_MSE_by_view += block_MSE_by_view(yt, y)
         if k == u:
             err.backward()
             # utils.clip_grad_norm_(model.parameters(), 1)
@@ -64,6 +70,7 @@ def train(model, lossf, optimizer, original, decoded, *lf, batch_size=1, u=0):
             k += 1
         err.cpu()
         acc += err.item()
+    MSE_by_view = acc_MSE_by_view / i
     model.save()
     return (acc, i)
 
