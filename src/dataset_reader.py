@@ -128,7 +128,12 @@ class pairwise_lister:
         return (bpp, read_LF(path))
     
     def read_pair(self, lfclass, lf):
-        bpps = list(self.bbps[lfclass, lf])
+        try:
+            bpps = self.bbps[lfclass, lf]
+        except KeyError:
+            lf = lf.replace("___", "_&_")
+            bpps = self.bbps[lfclass, lf]
+        bpps = list(bpps)
         shuffle(bpps)
         original = single(self.read_original_mat, (lfclass, lf))
         #print(len(original))
