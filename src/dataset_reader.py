@@ -16,6 +16,7 @@ from torch.utils.data import DataLoader
 from itertools import accumulate
 from einops import rearrange
 import cv2
+import einops
 
 class chain:
     def __init__(self, *components):
@@ -235,5 +236,24 @@ class reconstructor:
         self.i = new_i
     def save_image(self, filename):
         #print(self.shape)
-        folder = '/'.join(filename.split('/')[:-1])
+        folder = '/scratch/'.join(filename.split('/')[:-1])
         write_LF_PMG(self.values, filename)
+
+    def compare(self, original):
+        views_MSE = self.compare_MSE_by_view(original)
+        views_PSNR = 20 * np.log(1 / views_MSE ** 0.5)
+        PSNR_channel = einops.reduce(views_PSNR, 'c s t -> c', 'mean')
+        if len(PSNR_channel) == 1:
+            return PSNR_channel[0]
+        elif len(PSNR_channel) == 3:
+            return (6 * PSNR_channel[0] + 1 * PSNR_channel[1] + 1 * PSNR_channel[2]) / 8
+
+    def compare_MSE_by_view(self, original):
+        if original.shape[0] not in (1, 3):
+            raise ValueError("Expected LF to have either 1 or 3 color channels, found {original.shape[0]}")
+        reference = original[0, :, :, :, self.N:self.N + self.shape[-2], self.N:self.N + self.shape[-1]]
+        # print(reference.shape)
+        diff = self.values -  reference.numpy()
+        squared = np.einsum('...,...->...', diff, diff)
+        views_MSE = einops.reduce(squared, 'c s t u v -> c s t', 'mean')
+        return views_MSE

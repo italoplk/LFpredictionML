@@ -5,6 +5,7 @@ import torch.nn.utils as utils
 import random
 from dataset_reader import reconstructor, training_dataset, fold_dataset, blocked_referencer
 from torch.utils.data import DataLoader, RandomSampler
+import numpy as np
 
 lfloader = functools.partial(DataLoader, batch_size=1, num_workers=1, persistent_workers=True)
 
@@ -38,8 +39,13 @@ def loop_in_lf(action, lf, dataloader):
     return acc, i
 
 
+def block_MSE_by_view(yt, yc):
+    diff = yt - yc
+    return torch.einsum('bcuvst,bcuvst->uv', diff, diff) / (diff.shape[-1] * diff.shape[-2])
+
+
 # auterar o datareader pra sair exemplos
-def train(model, lossf, optimizer, original, decoded, *lf, batch_size=1, u=0):
+def train(model, folder, era, lossf, optimizer, original, decoded, *lf, batch_size=1, u=0):
     lf = lf
     loader = blocked_referencer(decoded, original)
     acc = 0
@@ -71,6 +77,13 @@ def train(model, lossf, optimizer, original, decoded, *lf, batch_size=1, u=0):
         err.cpu()
         acc += err.item()
     MSE_by_view = acc_MSE_by_view / i
+    with open(f"{folder}/trainMSE_Views.txt","a") as outputMSEs:
+        #convert tensor to string
+        cpu_tensor = MSE_by_view.to('cpu')
+        numpy_array = cpu_tensor.detach().numpy()
+        stringMSEviews = np.array2string(numpy_array)
+        outputMSEs.write("mse_lf: " + stringMSEviews+"\n")
+
     model.save()
     return (acc, i)
 
@@ -96,7 +109,7 @@ def test(model, original, decoded, *lf):
     return (acc, i)
 
 
-def reconstruct(model, prefix, original, decoded, lf, bpp):
+def reconstruct(model, folder,era, original, decoded, lf, bpp):
     loader = blocked_referencer(decoded, original)
     i = 0
     acc = 0
@@ -118,6 +131,20 @@ def reconstruct(model, prefix, original, decoded, lf, bpp):
         # print(yt.shape[0])
     # print(acc)
     # fprint(reconstruc.i, reconstruc.cap)
-    reconstruc.save_image(f"{prefix}{''.join(lf)}_{''.join(bpp)}")
+    reconstruc.save_image(f"validation_{folder}{''.join(lf)}_{''.join(bpp)}")
     # raise StopIteration(acc / i)
+    mse_view = reconstruc.compare_MSE_by_view(original)
+    mse_lf = reconstruc.compare(original)
+
+    with open(f"{folder}_{''.join(lf)}_{''.join(bpp)}.txt","a") as outputMSEs:
+        outputMSEs.write(f"era: {era}\n")
+        #convert tensor of floats to string
+        #numpy_array = mse_view.numpy()
+        stringMSEviews = np.array2string(mse_view)
+
+       # regular_string = binary_string.decode()
+
+        outputMSEs.write("mse_lf: " + np.array2string(mse_lf)+"\n")
+        outputMSEs.write("mse_view: " + stringMSEviews+"\n")
+
     return acc, i
