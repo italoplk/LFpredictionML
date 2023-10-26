@@ -38,7 +38,7 @@ with open("chosen_list.txt", "r") as foldfile:
 from iterating_over_dataset import loop_dataset, reconstruct, train, test
 import torch.nn as nn
 
-epochs = 100
+epochs = 1
 
 from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
 
@@ -58,15 +58,12 @@ for lr in lrs:
             model.cuda()
         optimizer = optim.Adam(model.parameters(), lr = lr)
         for era in range(1, epochs+1):
-            f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size = 10), training)
-            folder = f"{model_name}_examples/{era}/"
+            folder = f"{model_name}_results/{era}"
             os.makedirs(folder, exist_ok=True)
-            if (era % 20 == 0):
-                print(f"{era}\t{f}", end='')
-                val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation[:2])
-                print(f'\t{val}')            
-            else:
-                print(f"{era}\t{f}")
+            f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size = 10), training[:2])
+            print(f"{era}\t{f}", end='')
+            val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation[:2])
+            print(f'\t{val}')            
         
 # In[ ]:
 
