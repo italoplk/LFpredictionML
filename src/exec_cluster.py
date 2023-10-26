@@ -40,9 +40,9 @@ with open("chosen_list.txt", "r") as foldfile:
 
 
 import torch.nn as nn
-from space_model_noMax_8l_32in64out_correctingKernels_L1K2x2 import UNetSpace
+from space_only2x2_model import UNetSpace
 
-epochs = 1000
+epochs = 100
 
 #from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
 
@@ -52,7 +52,7 @@ lossf = nn.MSELoss()
 
 import sys
 batches = (10,)
-lr = 1e-5
+lr = 1e-4
 print('batch: ', batches)
 
 
@@ -64,26 +64,37 @@ print('batch: ', batches)
 
 for batch in batches:
 
-    configSaida = f"space_8_correctedFolds_L1-2k_4k_noMPnoDR_HBPP_32in64ou_B{batch}_LR{lr}.txt"
+    configSaida = f"space_8_2k_B{batch}_LR{lr}.txt"
+    print(configSaida+"\n", end='', file=open('/scratch/' + configSaida, 'w'))
     print(batch)
     print(f"modelname: {configSaida}", file=open('/scratch/' + configSaida, 'w'))
     ##for i, (training, validation) in enumerate(folds):
     for i, (training, validation) in enumerate(folds):
         #if i == 0: continue
         model_name = f"{configSaida}_{i}"
+
         model = UNetSpace(model_name)
         model.cuda()
         print(sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 
         optimizer = optim.Adam(model.parameters(), lr)
+        folder = "/scratch/MSEs/" + configSaida.split('.txt')[0]
+        os.makedirs(folder, exist_ok=True)
+        with open(f"{folder}/trainMSE_Views.txt", "w") as outputMSEs:
+            #reset file if re-simulating
+            outputMSEs.write(configSaida.split('.txt')[0])
+
         for era in range(1,epochs+1):
-            f = loop_dataset(functools.partial(train, model, lossf, optimizer, batch_size=10, u=2), training)
+            with open(f"{folder}/trainMSE_Views.txt", "a") as outputMSEs:
+                # reset file if re-simulating
+                outputMSEs.write(f"{era}\n")
+
+            f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size=10, u=2), training)
+
             if (era % 20 == 0):
                 print(f"{era}\t{f}", end='', file=open('/scratch/'+ configSaida, 'a'))
-                folder = f"{model_name}_examples/{era}/"
-                os.makedirs(folder, exist_ok=True)
-                val = loop_dataset(functools.partial(reconstruct, model, folder), validation[:2])
+                val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation[:2])
                 print(f'\t{val}', file=open('/scratch/'+ configSaida, 'a'))
             else:
                 print(f"{era}\t{f}", file=open('/scratch/'+ configSaida, 'a'))
