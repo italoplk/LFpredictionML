@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.utils as utils
 import random
+import json
 from dataset_reader import reconstructor, training_dataset, fold_dataset, blocked_referencer
 from torch.utils.data import DataLoader, RandomSampler
 import numpy as np
@@ -73,17 +74,15 @@ def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batc
             k += 1
         err.cpu()
         acc += err.item()
-    
+    MSE_lf = acc / i
     MSE_by_view = acc_MSE_by_view / i
     
     outfilename = f"{folder}/MSE_Views_train_{'_'.join(lf)}_{''.join(bpp)}"
 
-    with open(f"{outfilename}.txt","a") as outputMSEs:
+    data = { 'era' : era, 'mse_lf' : MSE_lf, "mse_by_view" : MSE_by_view.detach().numpy().tolist() }
+    with open(f"{outfilename}.json","w") as outputMSEs:
         #convert tensor to string
-        cpu_tensor = MSE_by_view.to('cpu')
-        numpy_array = cpu_tensor.detach().numpy()
-        stringMSEviews = np.array2string(numpy_array)
-        outputMSEs.write("mse_lf: " + stringMSEviews+"\n")
+        json.dump(data, outputMSEs)
     
 
 
@@ -140,15 +139,11 @@ def reconstruct(model, folder,era, original, decoded, lf, bpp):
     mse_view = reconstruc.compare_MSE_by_view(original)
     mse_lf = reconstruc.compare(original)
 
-    with open(f"{folder}/MSEs_val_{''.join(lf)}_{''.join(bpp)}.txt","a") as outputMSEs:
-        outputMSEs.write(f"era: {era}\n")
-        #convert tensor of floats to string
-        #numpy_array = mse_view.numpy()
-        stringMSEviews = np.array2string(mse_view)
+    outfilename = f"{folder}/MSE_Views_train_{'_'.join(lf)}_{''.join(bpp)}"
 
-       # regular_string = binary_string.decode()
-
-        outputMSEs.write("mse_lf: " + np.array2string(mse_lf)+"\n")
-        outputMSEs.write("mse_view: " + stringMSEviews+"\n")
+    data = { 'era' : era, 'mse_lf' : mse_lf, "mse_by_view" : mse_view.tolist() }
+    with open(f"{outfilename}.json","w") as outputMSEs:
+        #convert tensor to string
+        json.dump(data, outputMSEs)
 
     return acc, i
