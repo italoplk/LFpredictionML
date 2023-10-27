@@ -64,14 +64,27 @@ print('batch: ', batches)
 
 for batch in batches:
 
-    configSaida = f"space_8_2k_B{batch}_LR{lr}.txt"
-    print(configSaida+"\n", end='', file=open('/scratch/' + configSaida, 'w'))
+    configSaida = f"replicando_space_8_2k_B{batch}_LR{lr}.txt"
+
     print(batch)
-    print(f"modelname: {configSaida}", file=open('/scratch/' + configSaida, 'w'))
+
+    folder = "/scratch/MSEs/" + configSaida.split('.txt')[0] + "/"
+    os.makedirs(folder, exist_ok=True)
+
+
+
+    print(configSaida + "\n", end='', file=open(folder + configSaida, 'w'))
+
+
     ##for i, (training, validation) in enumerate(folds):
     for i, (training, validation) in enumerate(folds):
         #if i == 0: continue
         model_name = f"{configSaida}_{i}"
+
+        folder_train = folder + f"train_fold{i}/"
+        folder_validation = folder + f"validation_fold{i}/"
+        os.makedirs(folder_train, exist_ok=True)
+        os.makedirs(folder_validation, exist_ok=True)
 
         model = UNetSpace(model_name)
         model.cuda()
@@ -79,25 +92,25 @@ for batch in batches:
 
 
         optimizer = optim.Adam(model.parameters(), lr)
-        folder = "/scratch/MSEs/" + configSaida.split('.txt')[0]
-        os.makedirs(folder, exist_ok=True)
-        with open(f"{folder}/trainMSE_Views.txt", "w") as outputMSEs:
-            #reset file if re-simulating
-            outputMSEs.write(configSaida.split('.txt')[0])
+
+
 
         for era in range(1,epochs+1):
-            with open(f"{folder}/trainMSE_Views.txt", "a") as outputMSEs:
+         #   with open(f"{folder_train}/trainMSE_Views.txt", "a") as outputMSEs:
                 # reset file if re-simulating
-                outputMSEs.write(f"{era}\n")
+           #     outputMSEs.write(f"{era}\n")
 
-            f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size=10, u=2), training)
+            f = loop_dataset(functools.partial(train, model, folder_train, era, lossf, optimizer, batch_size=10, u=2), training)
+            print(f"{era}\t{f}", end='', file=open(folder + configSaida, 'a'))
+
+            val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation[:2])
 
             if (era % 20 == 0):
-                print(f"{era}\t{f}", end='', file=open('/scratch/'+ configSaida, 'a'))
-                val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation[:2])
-                print(f'\t{val}', file=open('/scratch/'+ configSaida, 'a'))
+                print(f"{era}\t{f}", end='', file=open(folder+configSaida, 'a'))
+                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation[:2])
+                print(f'\t{val}', file=open(folder + configSaida, 'a'))
             else:
-                print(f"{era}\t{f}", file=open('/scratch/'+ configSaida, 'a'))
+                print(f"{era}\t{f}", file=open('/scratch/'+folder+ configSaida, 'a'))
 
             # if (era % 10 == 0):
             #     test = loop_dataset(functools.partial(test, model, lossf, optimizer),test)

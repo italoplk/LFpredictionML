@@ -79,7 +79,8 @@ def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batc
     
     outfilename = f"{folder}/MSE_Views_train_{'_'.join(lf)}_{''.join(bpp)}"
 
-    data = { 'era' : era, 'mse_lf' : MSE_lf, "mse_by_view" : MSE_by_view.detach().numpy().tolist() }
+    cpu_tensor = MSE_by_view.cpu()
+    data = { 'era' : era, 'mse_lf' : MSE_lf, "mse_by_view" : cpu_tensor.detach().numpy().tolist() }
     with open(f"{outfilename}.json","w") as outputMSEs:
         #convert tensor to string
         json.dump(data, outputMSEs)
@@ -147,3 +148,5 @@ def reconstruct(model, folder,era, original, decoded, lf, bpp):
         json.dump(data, outputMSEs)
 
     return acc, i
+
+
