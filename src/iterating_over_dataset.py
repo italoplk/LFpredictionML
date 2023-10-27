@@ -83,7 +83,7 @@ def train(model, folder, era, lossf, optimizer, original, decoded, *lf, batch_si
         cpu_tensor = MSE_by_view.to('cpu')
         numpy_array = cpu_tensor.detach().numpy()
         stringMSEviews = np.array2string(numpy_array)
-        outputMSEs.write("mse_lf: " + stringMSEviews+"\n")
+        outputMSEs.write("mse_views: " + stringMSEviews+"\n")
 
 
     model.save()
