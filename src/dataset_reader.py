@@ -82,8 +82,11 @@ def write_LF_PMG(image, path):
 
 def read_LF(path):
     img = read_LF_PNG(path)
-    img_ycbcr = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
-    img_normalized = normalize_16bit_image(img_ycbcr)
+    if len(img.shape) != 2:
+        img_y = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))[:,:,:1]
+    else:
+        img_y = rearrange(np.array(img), '... -> ... 1')
+    img_normalized = normalize_16bit_image(img_y)
     try:
         return rearrange(img_normalized, '(s u) (t v) c -> c s t u v', s=13, t=13)[:1, :, :, :, :]
     except EinopsError:
