@@ -51,7 +51,7 @@ epochs = 100
 lossf = nn.MSELoss()
 
 import sys
-batches = (10,)
+batches = (1,)
 lr = 1e-4
 print('batch: ', batches)
 
@@ -103,14 +103,13 @@ for batch in batches:
             f = loop_dataset(functools.partial(train, model, folder_train, era, lossf, optimizer, batch_size=10, u=2), training)
             print(f"{era}\t{f}", end='', file=open(folder + configSaida, 'a'))
 
-            val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation[:2])
 
             if (era % 20 == 0):
                 print(f"{era}\t{f}", end='', file=open(folder+configSaida, 'a'))
                 val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation[:2])
                 print(f'\t{val}', file=open(folder + configSaida, 'a'))
             else:
-                print(f"{era}\t{f}", file=open('/scratch/'+folder+ configSaida, 'a'))
+                print(f"{era}\t{f}", file=open(folder + configSaida, 'a'))
 
             # if (era % 10 == 0):
             #     test = loop_dataset(functools.partial(test, model, lossf, optimizer),test)
