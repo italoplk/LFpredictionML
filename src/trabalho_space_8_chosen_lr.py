@@ -63,7 +63,7 @@ for lr in lrs:
             os.makedirs(folder, exist_ok=True)
             if (era % 20 == 0):
                 print(f"{era}\t{f}", end='')
-                val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation[:2])
+                val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation, { "save_image" : 2})
                 print(f'\t{val}')            
             else:
                 print(f"{era}\t{f}")
