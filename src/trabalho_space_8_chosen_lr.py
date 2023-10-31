@@ -41,7 +41,7 @@ import torch.nn as nn
 epochs = 100
 
 from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
-
+from dataset_reader import test_dataset
 import sys
 lrs = (1e-4,) if (len(sys.argv) < 2) else tuple(map(float, sys.argv[1:]))
 print(lrs)
@@ -67,6 +67,8 @@ for lr in lrs:
                 print(f'\t{val}')            
             else:
                 print(f"{era}\t{f}")
+        os.makedirs(f'testing_{model_name}', exist_ok=True)
+        loop_dataset(functools.partial(reconstruct, model, 'testing', 1), test_dataset.lfs, {'save_image' : 4},test_dataset)
         
 # In[ ]:
 
