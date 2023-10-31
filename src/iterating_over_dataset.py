@@ -13,11 +13,11 @@ lfloader = functools.partial(DataLoader, batch_size=1, num_workers=1, persistent
 
 make_dataloader = functools.partial(DataLoader, batch_size=5, num_workers=2, prefetch_factor=1, persistent_workers=True)
 
-def loop_dataset(action, lfs, mark : Dict[str, int]=dict()):
+def loop_dataset(action, lfs, mark : Dict[str, int]=dict(), dataset=training_dataset):
     acc = 0
     i = 0
     # print(len(lfs))
-    lfs = fold_dataset(training_dataset.read_pair, lfs)
+    lfs = fold_dataset(dataset.read_pair, lfs)
     for i, (lf, lfdata) in enumerate(lfs, start=1):
         loader = iter(lfloader(lfdata))
         r = loop_in_lf(action, lf, loader, **{ key : i < value for key, value in mark.items()})
