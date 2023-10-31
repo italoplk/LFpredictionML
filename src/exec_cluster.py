@@ -51,8 +51,8 @@ epochs = 100
 lossf = nn.MSELoss()
 
 import sys
-batches = (1,)
-lr = 1e-4
+batches = (10,)
+lr = 1e-5
 print('batch: ', batches)
 
 
@@ -64,7 +64,7 @@ print('batch: ', batches)
 
 for batch in batches:
 
-    configSaida = f"replicando_space_8_2k_B{batch}_LR{lr}.txt"
+    configSaida = f"replicando_FullValidation_space_8_2k_B{batch}_LR{lr:.0e}.txt"
 
     print(batch)
 
@@ -101,12 +101,11 @@ for batch in batches:
            #     outputMSEs.write(f"{era}\n")
 
             f = loop_dataset(functools.partial(train, model, folder_train, era, lossf, optimizer, batch_size=10, u=2), training)
-            print(f"{era}\t{f}", end='', file=open(folder + configSaida, 'a'))
 
 
             if (era % 20 == 0):
                 print(f"{era}\t{f}", end='', file=open(folder+configSaida, 'a'))
-                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation[:2])
+                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation)
                 print(f'\t{val}', file=open(folder + configSaida, 'a'))
             else:
                 print(f"{era}\t{f}", file=open(folder + configSaida, 'a'))

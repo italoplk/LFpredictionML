@@ -31,7 +31,7 @@ string_counts_val = {}
 
 
 import json
-with open("chosen_list.txt", "r") as foldfile, open("outputFolds.txt", "w") as output:
+with open("../chosen_list.txt", "r") as foldfile, open("outputFolds.txt", "w") as output:
     folds = json.loads(foldfile.read())
     for lf in folds[0][0]:
         if lf[0] in string_counts:
