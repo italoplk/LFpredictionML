@@ -1,8 +1,10 @@
 import functools
+from typing import Dict
 import torch
 import torch.nn as nn
 import torch.nn.utils as utils
 import random
+import json
 from dataset_reader import reconstructor, training_dataset, fold_dataset, blocked_referencer
 from torch.utils.data import DataLoader, RandomSampler
 import numpy as np
@@ -11,26 +13,25 @@ lfloader = functools.partial(DataLoader, batch_size=1, num_workers=1, persistent
 
 make_dataloader = functools.partial(DataLoader, batch_size=5, num_workers=2, prefetch_factor=1, persistent_workers=True)
 
-
-def loop_dataset(action, lfs):
+def loop_dataset(action, lfs, mark : Dict[str, int]=dict()):
     acc = 0
     i = 0
     # print(len(lfs))
     lfs = fold_dataset(training_dataset.read_pair, lfs)
-    for lf, lfdata in lfs:
+    for i, (lf, lfdata) in enumerate(lfs, start=1):
         loader = iter(lfloader(lfdata))
-        r = loop_in_lf(action, lf, loader)
+        r = loop_in_lf(action, lf, loader, **{ key : i < value for key, value in mark.items()})
         acc += r[0]
         i += r[1]
     return acc / i
 
 
-def loop_in_lf(action, lf, dataloader):
+def loop_in_lf(action, lf, dataloader, **marks):
     original = next(dataloader)
     acc = 0
     i = 0
     for bpp, decoded in dataloader:
-        r = action(original, decoded, lf, bpp)
+        r = action(original, decoded, lf, bpp, **marks)
         acc += r[0]
         i += r[1]
     # print(f"{lf}\t{acc}")
@@ -43,7 +44,7 @@ def block_MSE_by_view(yt, yc):
 
 
 # auterar o datareader pra sair exemplos
-def train(model, folder, era, lossf, optimizer, original, decoded, *lf, batch_size=1, u=0):
+def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batch_size=1, u=0):
     lf = lf
     loader = blocked_referencer(decoded, original)
     acc = 0
@@ -74,17 +75,15 @@ def train(model, folder, era, lossf, optimizer, original, decoded, *lf, batch_si
             k += 1
         err.cpu()
         acc += err.item()
+    MSE_lf = acc / i
     MSE_by_view = acc_MSE_by_view / i
+    
+    outfilename = f"{folder}/MSE_Views_train_{'_'.join(lf)}_{''.join(bpp)}"
 
-
-
-    with open(f"{folder}/trainMSE_Views.txt","a") as outputMSEs:
+    data = { 'era' : era, 'mse_lf' : MSE_lf, "mse_by_view" : MSE_by_view.detach().numpy().tolist() }
+    with open(f"{outfilename}.json","w") as outputMSEs:
         #convert tensor to string
-        cpu_tensor = MSE_by_view.to('cpu')
-        numpy_array = cpu_tensor.detach().numpy()
-        stringMSEviews = np.array2string(numpy_array)
-        outputMSEs.write("mse_views: " + stringMSEviews+"\n")
-
+        json.dump(data, outputMSEs)
 
     model.save()
     return (acc, i)
@@ -111,7 +110,7 @@ def test(model, original, decoded, *lf):
     return (acc, i)
 
 
-def reconstruct(model, folder,era, original, decoded, lf, bpp):
+def reconstruct(model, folder,era, original, decoded, lf, bpp, save_image):
     loader = blocked_referencer(decoded, original)
     i = 0
     acc = 0
@@ -133,20 +132,17 @@ def reconstruct(model, folder,era, original, decoded, lf, bpp):
         # print(yt.shape[0])
     # print(acc)
     # fprint(reconstruc.i, reconstruc.cap)
-    reconstruc.save_image(f"validation_{folder}{''.join(lf)}_{''.join(bpp)}")
+    if save_image:
+        reconstruc.save_image(f"validation_{folder}{''.join(lf)}_{''.join(bpp)}")
     # raise StopIteration(acc / i)
     mse_view = reconstruc.compare_MSE_by_view(original)
     mse_lf = reconstruc.compare(original)
 
-    with open(f"{folder}_{''.join(lf)}_{''.join(bpp)}.txt","a") as outputMSEs:
-        outputMSEs.write(f"era: {era}\n")
-        #convert tensor of floats to string
-        #numpy_array = mse_view.numpy()
-        stringMSEviews = np.array2string(mse_view)
+    outfilename = f"{folder}/MSE_Views_train_{'_'.join(lf)}_{''.join(bpp)}"
 
-       # regular_string = binary_string.decode()
-
-        outputMSEs.write("mse_lf: " + np.array2string(mse_lf)+"\n")
-        outputMSEs.write("mse_view: " + stringMSEviews+"\n")
+    data = { 'era' : era, 'mse_lf' : float(mse_lf), "mse_by_view" : mse_view.tolist() }
+    with open(f"{outfilename}.json","w") as outputMSEs:
+        #convert tensor to string
+        json.dump(data, outputMSEs)
 
     return acc, i
