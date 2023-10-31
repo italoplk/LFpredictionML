@@ -49,13 +49,14 @@
 
 
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+import cv2
 import numpy as np
+
 
 # Load the PNG image
 # image_path = '/home/idm/Original_LFs/Nature/Bush.mat.png'
 image_path = '/home/idm/bpp_0.75.png'
-img = mpimg.imread(image_path)
+img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
 # If the image has color channels, convert it to grayscale for histogram
 if img.ndim == 3:
