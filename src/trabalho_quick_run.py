@@ -51,7 +51,6 @@ lossf = nn.MSELoss()
 for lr in lrs:
     print(lr)
     for i, (training, validation) in enumerate(folds):
-        if i == 0: continue
         model_name = f"space8_lr_{lr}_{i}"
         model = UNetSpace(model_name)
         if torch.cuda.is_available():
@@ -64,7 +63,12 @@ for lr in lrs:
             print(f"{era}\t{f}", end='')
             val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation[:2], { "save_image" : 2})
             print(f'\t{val}')            
-        
+
+from dataset_reader import test_dataset
+
+os.makedirs('testing', exist_ok=True)
+loop_dataset(functools.partial(reconstruct, model, 'testing', 1), test_dataset.lfs, {'save_image' : 4},test_dataset)
+  
 # In[ ]:
 
 
