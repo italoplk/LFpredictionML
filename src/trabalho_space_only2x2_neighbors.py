@@ -57,7 +57,7 @@ for i, (training, validation) in enumerate(folds):
     for era in range(1, epochs+1):
         folder = f"{model_name}_examples/{era}/"
         os.makedirs(folder, exist_ok=True)
-        f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size = 10), training)
+        f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size = 5), training)
         if (era % 20 == 0):
             print(f"{era}\t{f}", end='')
             val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation, { "save_image" : 2})
