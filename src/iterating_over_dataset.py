@@ -65,7 +65,7 @@ def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batc
         err = lossf(yt, y)
 
         curr_MSE_by_view = block_MSE_by_view(yt, y)
-        print(curr_MSE_by_view.shape)
+        if (tuple(curr_MSE_by_view.shape) != (13,13)): print(curr_MSE_by_view.shape)
         acc_MSE_by_view += curr_MSE_by_view
         if k == u:
             err.backward()
