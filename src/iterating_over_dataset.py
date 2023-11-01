@@ -64,7 +64,9 @@ def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batc
             yt = yt.cuda()
         err = lossf(yt, y)
 
-        acc_MSE_by_view += block_MSE_by_view(yt, y)
+        curr_MSE_by_view = block_MSE_by_view(yt, y)
+        print(curr_MSE_by_view.shape)
+        acc_MSE_by_view += curr_MSE_by_view
         if k == u:
             err.backward()
             # utils.clip_grad_norm_(model.parameters(), 1)
