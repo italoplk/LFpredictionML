@@ -40,7 +40,7 @@ import torch.nn as nn
 
 epochs = 100
 
-from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
+from space_only2x2_neighbors import UNetSpace
 from dataset_reader import test_dataset
 import sys
 
@@ -49,7 +49,7 @@ lr = 1e-4
 lossf = nn.MSELoss()
 for i, (training, validation) in enumerate(folds):
     if i == 0: continue
-    model_name = f"space8_lr_{lr}_{i}"
+    model_name = f"space8_only_2x2_neighbors_{i}"
     model = UNetSpace(model_name)
     if torch.cuda.is_available():
         model.cuda()
