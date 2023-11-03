@@ -77,7 +77,7 @@ class UNetSpace(nn.Module):
             ),
             nn.Sequential( # 10, 1, 1
                 ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 5²
-                ConvTranspose2d(10, 1, (2,2)), nn.PReLU(), # 10, 5²
+                ConvTranspose2d(10, 1, (2,2)), nn.Sigmoid(), # 10, 5²
             ),
         ], compose = lambda x,y: x+y)
         self.blocker = blocker

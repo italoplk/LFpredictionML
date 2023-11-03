@@ -84,6 +84,14 @@ def read_LF(path):
     #do grey scale outside
     img_ycbcr = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
     img_normalized = normalize_16bit_image(img_ycbcr)
+
+    import matplotlib as plt
+    plt.figure()
+    plt.imshow(img_normalized, interpolation='none')
+    plt.grid(False)
+    plt.title('lenslet')
+    plt.show()
+
     try:
         return rearrange(img_normalized, '(s u) (t v) c -> c s t u v', s=13, t=13)[:1, :, :, :, :]
     except EinopsError:

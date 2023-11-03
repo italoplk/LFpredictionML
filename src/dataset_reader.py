@@ -61,16 +61,23 @@ class single:
             return self.f()
 import sys
 from einops import EinopsError
-
+#TODO CHECAR O -1 DUPLO
 normalizer_factor = 2/(2 ** 16 - 1)
 def read_LF_PNG(path):
     return cv2.imread(path, cv2.IMREAD_UNCHANGED)
 
+# def normalize_16bit_image(image):
+#     return torch.tensor(image.astype(np.float32)) * normalizer_factor - 1
+
 def normalize_16bit_image(image):
-    return torch.tensor(image.astype(np.float32)) * normalizer_factor - 1
+    return torch.tensor(image.astype(np.float32)) * 255.0
+
+
+# def unnormalize_to_16bit_image(image):
+#     return (((image +1)/normalizer_factor).astype(np.uint16))
 
 def unnormalize_to_16bit_image(image):
-    return (((image +1)/normalizer_factor).astype(np.uint16))
+    return (((image)/255).astype(np.uint16))
 
 #write the LFs after validation
 def write_LF_PMG(image, path):
@@ -236,8 +243,9 @@ class reconstructor:
         self.i = new_i
     def save_image(self, filename):
         #print(self.shape)
-        folder = '/scratch/'.join(filename.split('/')[:-1])
-        write_LF_PMG(self.values, filename)
+        folder = '/'.join(filename.split('/')[:-1])
+        print(folder)
+        write_LF_PMG(self.values, folder)
 
     def compare(self, original):
         views_MSE = self.compare_MSE_by_view(original)

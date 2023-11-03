@@ -135,7 +135,7 @@ def reconstruct(model, folder,era, original, decoded, lf, bpp):
         # print(yt.shape[0])
     # print(acc)
     # fprint(reconstruc.i, reconstruc.cap)
-    reconstruc.save_image(f"validation_{folder}{''.join(lf)}_{''.join(bpp)}")
+    reconstruc.save_image(f"{folder}/{''.join(lf)}_{''.join(bpp)}")
     # raise StopIteration(acc / i)
     mse_view = reconstruc.compare_MSE_by_view(original)
     mse_lf = reconstruc.compare(original)

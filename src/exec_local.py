@@ -72,7 +72,7 @@ for batch in batches:
         #if i == 0: continue
         model_name = f"space8_batch_{batch}_{i}"
         model = UNetSpace(model_name)
-        model.cuda()
+       # model.cuda()
         print(sum(p.numel() for p in model.parameters() if p.requires_grad))
 
         

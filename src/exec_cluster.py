@@ -42,7 +42,7 @@ with open("chosen_list.txt", "r") as foldfile:
 import torch.nn as nn
 from space_only2x2_model import UNetSpace
 
-epochs = 100
+epochs = 8
 
 #from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
 
@@ -64,7 +64,7 @@ print('batch: ', batches)
 
 for batch in batches:
 
-    configSaida = f"replicando_FullValidation_space_8_2k_B{batch}_LR{lr:.0e}.txt"
+    configSaida = f"normalizedSigmoid_FullValidation_space_8_2k_B{batch}_LR{lr:.0e}.txt"
 
     print(batch)
 
@@ -103,7 +103,7 @@ for batch in batches:
             f = loop_dataset(functools.partial(train, model, folder_train, era, lossf, optimizer, batch_size=10, u=2), training)
 
 
-            if (era % 20 == 0):
+            if (era % 2 == 0):
                 print(f"{era}\t{f}", end='', file=open(folder+configSaida, 'a'))
                 val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation)
                 print(f'\t{val}', file=open(folder + configSaida, 'a'))

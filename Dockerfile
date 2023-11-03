@@ -6,6 +6,9 @@ FROM eidos-service.di.unito.it/eidos-base-pytorch:1.12.0
 RUN pip3 install filelock
 RUN pip3 install gdown
 RUN pip3 install einops
+#TODO remover depois de extrair os multiviews
+RUN pip3 install plenopticam
+RUN pip3 install IPython
 
 
 
