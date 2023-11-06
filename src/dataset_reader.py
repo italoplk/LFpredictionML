@@ -106,9 +106,9 @@ class pairwise_lister:
         #print('Original', self.original_paths)
 
         self.original_lfs = { tuple(path.split("/")[-2:]) : path for path in self.original_paths}
-        #print(self.original_paths)
+        #print(self.original_lfs)
         self.decoded_lfs = { tuple(path.split("/")[-3:]) : path for path in self.decoded_paths}
-        self.errs = [tuple(key[:2]) for key in self.decoded_lfs if (key[0], key[1] + '.png') not in self.original_lfs]
+        self.errs = [(key[0], key[1] + 'mat.png') for key in self.decoded_lfs if (key[0], key[1] + 'mat.png') not in self.original_lfs]
         #print(self.errs)
         self.pairs = {
             key : (self.original_lfs[(key[0], key[1] + '.mat.png')], dec_path) for key, dec_path in self.decoded_lfs.items()}
