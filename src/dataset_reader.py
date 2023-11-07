@@ -174,19 +174,13 @@ class fold_dataset:
         return (index, self.lister(*index))
     def sampled(self, n):
         return (self[i] for i in sample(range(len(self)), n))
+load_dotenv()
 
+ORIGINAL_LFS_PATH = os.environ["ORIGINAL_LFS_PATH"]
+DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]
 
-load_dotenv("./_italo.env")
-
-# ORIGINAL_LFS_PATH = os.environ["ORIGINAL_LFS_PATH"]
-# DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]
-#
-# training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
-# test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=False)
-
-training_dataset = pairwise_lister("/home/shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
-test_dataset = pairwise_lister("../../../shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = False)
-
+training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
+test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=False)
 
 
 #display(list((k, v) for k,v in training_dataset.bbps.items() if len(v) != 5)[:5])
