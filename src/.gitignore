@@ -5,3 +5,4 @@ log_*
 *_examples**
 *_results**
 testing
+.env
