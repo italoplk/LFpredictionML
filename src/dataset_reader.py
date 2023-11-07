@@ -154,9 +154,9 @@ class fold_dataset:
         return (self[i] for i in sample(range(len(self)), n))
 
 
-training_dataset = pairwise_lister("/scratch/Original_LFs/png", "/scratch/HBPP/", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
+training_dataset = pairwise_lister("/scratch/Original_LFs/png", "/scratch/Decoded_LFs/png/decoded_32_noPartition/", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
 
-test_dataset = pairwise_lister("/scratch/Original_LFs/png", "/scratch/HBPP/", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = False)
+test_dataset = pairwise_lister("/scratch/Original_LFs/png", "/scratch/Decoded_LFs/png/decoded_32_noPartition/", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = False)
 
 
 
