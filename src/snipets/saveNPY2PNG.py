@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 from PIL import Image
 
@@ -5,7 +7,7 @@ from PIL import Image
 # Create 10 random floats in range 0..1 in array "b"
 
 # Read back into different array "r"
-y_cb_cr_array = np.load('/home/idm/vp_s2ack1.png.npy')
+# y_cb_cr_array = np.load('/home/idm/vp_s2ack1.png.npy')
 # im = Image.fromarray(r.astype(np.uint16))
 # im.save("t1.jpeg")
 #
@@ -13,23 +15,25 @@ y_cb_cr_array = np.load('/home/idm/vp_s2ack1.png.npy')
 # im = Image.fromarray(r.astype(np.uint8))
 # im.save("t2.jpeg")
 
+def saveNPYasPNG(img_array, path, lf_name):
 
-y = y_cb_cr_array[:, :, 0]
-cb = y_cb_cr_array[:, :, 1]
-cr = y_cb_cr_array[:, :, 2]
+    y = img_array[:, :, 0]
+    cb = img_array[:, :, 1]
+    cr = img_array[:, :, 2]
 
-r = y  * 255
-g = cb * 255
-b = cr * 255
+    r = y  * 255
+    g = cb * 255
+    b = cr * 255
 
-# Stack the RGB channels to create an RGB image
-rgb_array = np.stack((r, g, b), axis=-1).clip(0, 255).astype(np.uint8)
+    # Stack the RGB channels to create an RGB image
+    rgb_array = np.stack((r, g, b), axis=-1).clip(0, 255).astype(np.uint8)
 
-# Create a PIL Image from the RGB array
-image = Image.fromarray(rgb_array)
+    # Create a PIL Image from the RGB array
+    image = Image.fromarray(rgb_array)
 
-# Save the image to a PNG file
-image.save("Divided.png")
+    # Save the image to a PNG file
+    image.save(os.path.join(path, lf_name))
+    return image
 
 
 # width, height = y.shape[1], y.shape[0]

@@ -5,6 +5,7 @@
 #concat((torch.zeros(1,2,3), torch.zeros(1,2,3)), axis=1).shape
 
 import os
+
 from torch.utils.data import DataLoader, RandomSampler
 #from torchsummary import summary
 
@@ -22,7 +23,7 @@ import itertools
 
 
 from iterating_over_dataset import loop_dataset, reconstruct, train, test
-
+from dataset_reader import test_dataset
 
 def random_split_n(data, kfolds):
     random.shuffle(data)
@@ -42,7 +43,7 @@ with open("chosen_list.txt", "r") as foldfile:
 import torch.nn as nn
 from space_only2x2_model import UNetSpace
 
-epochs = 8
+
 
 #from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
 
@@ -51,6 +52,7 @@ epochs = 8
 lossf = nn.MSELoss()
 
 import sys
+epochs = 20
 batches = (10,)
 lr = 1e-5
 print('batch: ', batches)
@@ -64,7 +66,7 @@ print('batch: ', batches)
 
 for batch in batches:
 
-    configSaida = f"normalizedSigmoid_FullValidation_space_8_2k_B{batch}_LR{lr:.0e}.txt"
+    configSaida = f"quick_imgTangenteYCBCR_2k_16l_sigmoid.txt"
 
     print(batch)
 
@@ -83,8 +85,10 @@ for batch in batches:
 
         folder_train = folder + f"train_fold{i}/"
         folder_validation = folder + f"validation_fold{i}/"
+        folder_test = folder + f"test_output/"
         os.makedirs(folder_train, exist_ok=True)
         os.makedirs(folder_validation, exist_ok=True)
+        os.makedirs(folder_test, exist_ok=True)
 
         model = UNetSpace(model_name)
         model.cuda()
@@ -105,14 +109,20 @@ for batch in batches:
 
             if (era % 2 == 0):
                 print(f"{era}\t{f}", end='', file=open(folder+configSaida, 'a'))
-                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation)
+                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation, { "save_image" : 2} )
                 print(f'\t{val}', file=open(folder + configSaida, 'a'))
+                print(f'\t{val}')
             else:
                 print(f"{era}\t{f}", file=open(folder + configSaida, 'a'))
+                print(f"{era}\t{f}")
 
             # if (era % 10 == 0):
             #     test = loop_dataset(functools.partial(test, model, lossf, optimizer),test)
 
-    model.save()
+        model.save()
+
+    # loop_dataset(functools.partial(reconstruct, model, folder_test, 1), test_dataset.lfs)
+    loop_dataset(functools.partial(reconstruct, model, folder_test, 1), test_dataset.lfs, {'save_image' : 4}, test_dataset)
+
 
 
