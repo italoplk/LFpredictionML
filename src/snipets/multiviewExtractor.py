@@ -178,7 +178,7 @@ for lf in os.listdir(path):
 
     cuted_lf = cut.cut_center(rgb_img)
 
-    save_lensletRGB_path = '/home/idm/Original_lenslets/Buildings/'
+    save_lensletRGB_path = '/home/idm/Original_Lenslets/Buildings/'
     save_lensletGscale_path = '/home/idm/Original_gScale_lenslets/Buildings/'
     llr.multiview2lenslet(cuted_lf, save_lensletRGB_path, save_lensletGscale_path, lf_name)
 
