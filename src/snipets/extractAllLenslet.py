@@ -18,5 +18,5 @@ os.makedirs(save_lensletGscale_path, exist_ok=True)
 os.makedirs(save_mv_path, exist_ok=True)
 os.makedirs(save_lensletRGB_path, exist_ok=True)
 for lf in os.listdir(inner_path):
-    if lf.split(".")[0] + ".png" not in os.listdir(save_lensletRGB_path):
+    if lf.split(".")[0] + ".png" not in os.listdir(save_lensletRGB_path) and len(lf.split(".")) == 2:
         extractor.extract_lenslet(inner_path, save_lensletGscale_path, save_mv_path, save_lensletRGB_path, lf)
