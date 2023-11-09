@@ -1,7 +1,7 @@
 import os
 
 import einops as ein
-import cv2
+
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
@@ -33,7 +33,7 @@ from PIL import Image
 
 def multiview2lenslet(img, path_rgb, path_gscale, lf_name):
     image_array = np.array(img)
-    image_array = ein.rearrange(image_array, '(v h) (u w)  c -> (h v) (w u)  c', u=9, v=9, w=620, h=432)
+    image_array = ein.rearrange(image_array, '(v h) (u w)  c -> (h v) (w u)  c', u=9, v=9)
     # Convert the NumPy array back to an image using Pillow
     reconstructed_image = Image.fromarray(image_array)
 
