@@ -1,4 +1,4 @@
-# from glob import glob
+from glob import glob
 #print(glob("Original_LFs/mat/*/*")[:5])
 #print(glob("Decoded_LFs/mat/*/*/*")[:5])
 
@@ -17,6 +17,8 @@ from itertools import accumulate
 from einops import rearrange
 import cv2
 import einops
+import os
+from dotenv import load_dotenv
 
 class chain:
     def __init__(self, *components):
@@ -66,14 +68,22 @@ normalizer_factor = 2/(2 ** 16 - 1)
 def read_LF_PNG(path):
     return cv2.imread(path, cv2.IMREAD_UNCHANGED)
 
+# def normalize_16bit_image(image):
+#     return torch.tensor(image.astype(np.float32)) * normalizer_factor - 1
+
 def normalize_16bit_image(image):
     return torch.tensor(image.astype(np.float32)) * normalizer_factor - 1
+
 def normalize_16bit_image_rgb(image):
     return torch.tensor(image.astype(np.float32)) / 255.0
 
 
+# def unnormalize_to_16bit_image(image):
+#     return (((image +1)/normalizer_factor).astype(np.uint16))
+
 def unnormalize_to_16bit_image(image):
     return (((image+1)/normalizer_factor).astype(np.uint16))
+
 def unnormalize_to_16bit_image_rgb(image):
     return (((image)*255.0).astype(np.uint16))
 
@@ -81,24 +91,14 @@ def unnormalize_to_16bit_image_rgb(image):
 def write_LF_PMG(image, path):
     image = rearrange(image, 'c s t u v -> (s u) (t v) c', s=13, t=13)
     image = unnormalize_to_16bit_image(image)
-    # image = cv2.cvtColor(image, cv2.COLOR_YCrCb2BGR)
+    #image = cv2.cvtColor(image, cv2.COLOR_YCrCb2BGR)
     #print(image.shape)
     cv2.imwrite(f'{path}', image)
 
 def read_LF(path):
     img = read_LF_PNG(path)
-    # print(img.min())
-    # print(img.max())
-
     img_ycbcr = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
     img_normalized = normalize_16bit_image(img_ycbcr)
-
-    # import matplotlib.pyplot as plt
-    # img_uno =unnormalize_to_16bit_image(img_normalized)
-    # print(img_uno.min())
-    # print(img_uno.max())
-    # plt.imsave("/scratch/savetest.png", img_uno.astype(np.uint8))
-
     try:
         return rearrange(img_normalized, '(s u) (t v) c -> c s t u v', s=13, t=13)[:1, :, :, :, :]
     except EinopsError:
@@ -167,16 +167,16 @@ class fold_dataset:
         return (index, self.lister(*index))
     def sampled(self, n):
         return (self[i] for i in sample(range(len(self)), n))
+load_dotenv()
 
+ORIGINAL_LFS_PATH = os.environ["ORIGINAL_LFS_PATH"]
+DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]
 
-# training_dataset = pairwise_lister("/scratch/Original_LFs/png", "/scratch/Decoded_LFs/png/decoded_32_noPartition/", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
-#
-# test_dataset = pairwise_lister("/home/machado/scratch/Original_LFs/png", "/home/machado/scratch/Decoded_LFs/png/decoded_32_noPartition/", ["Fountain___Vincent_2","Stone_Pillars_Outside"], exclude = False)#"Bikes", "Danger_de_Mort", ",
-#
+training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
+test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=False)
 
-training_dataset = pairwise_lister("../../../shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
-
-test_dataset = pairwise_lister("../../../shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = False)
+# training_dataset = pairwise_lister("../../../shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
+# test_dataset = pairwise_lister("../../../shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = False)
 
 
 
@@ -256,9 +256,9 @@ class reconstructor:
         self.i = new_i
     def save_image(self, filename):
         #print(self.shape)
-        #folder = '/'.join(filename.split('/')[:-1])
-        #print(folder)
-        write_LF_PMG(self.values, filename)
+        folder = '/'.join(filename.split('/')[:-1])
+        print(folder)
+        write_LF_PMG(self.values, folder)
 
     def compare(self, original):
         views_MSE = self.compare_MSE_by_view(original)

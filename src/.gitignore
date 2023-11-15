@@ -1,0 +1,8 @@
+__pycache__
+*.png
+*.data
+log_*
+*_examples**
+*_results**
+testing
+.env
