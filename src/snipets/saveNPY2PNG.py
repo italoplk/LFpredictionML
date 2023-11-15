@@ -17,24 +17,29 @@ from PIL import Image
 
 def saveNPYasPNG(img_array, path, lf_name):
 
-    y = img_array[:, :, 0]
-    cb = img_array[:, :, 1]
-    cr = img_array[:, :, 2]
-
-    r = y  * 255
-    g = cb * 255
-    b = cr * 255
-
+    # y = img_array[:, :, 0]
+    # cb = img_array[:, :, 1]
+    # cr = img_array[:, :, 2]
+    #
+    # r = y  * 255.0
+    # g = cb * 255.0
+    # b = cr * 255.0
+    rgb_array = img_array*255.0
     # Stack the RGB channels to create an RGB image
-    rgb_array = np.stack((r, g, b), axis=-1).clip(0, 255).astype(np.uint8)
+    # print("red: ", r.max())
+    # print("green: ", g.max())
+    # print("blue: ", b.max())
+    # rgb_array = np.stack((r, g, b), axis=-1)
 
     # Create a PIL Image from the RGB array
-    image = Image.fromarray(rgb_array)
+    image = Image.fromarray(rgb_array.astype(np.uint8))
 
     # Save the image to a PNG file
     image.save(os.path.join(path, lf_name))
     return image
 
+# array = np.load("/home/idm/vp_stack1.png.npy")
+# saveNPYasPNG(array,"/home/idm", "printMax.png" )
 
 # width, height = y.shape[1], y.shape[0]
 # filename = "ycbcr_image.ppm"

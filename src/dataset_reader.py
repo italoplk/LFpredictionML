@@ -1,4 +1,4 @@
-from glob import glob
+# from glob import glob
 #print(glob("Original_LFs/mat/*/*")[:5])
 #print(glob("Decoded_LFs/mat/*/*/*")[:5])
 
@@ -81,7 +81,7 @@ def unnormalize_to_16bit_image_rgb(image):
 def write_LF_PMG(image, path):
     image = rearrange(image, 'c s t u v -> (s u) (t v) c', s=13, t=13)
     image = unnormalize_to_16bit_image(image)
-    image = cv2.cvtColor(image, cv2.COLOR_YCrCb2BGR)
+    # image = cv2.cvtColor(image, cv2.COLOR_YCrCb2BGR)
     #print(image.shape)
     cv2.imwrite(f'{path}', image)
 
@@ -174,9 +174,9 @@ class fold_dataset:
 # test_dataset = pairwise_lister("/home/machado/scratch/Original_LFs/png", "/home/machado/scratch/Decoded_LFs/png/decoded_32_noPartition/", ["Fountain___Vincent_2","Stone_Pillars_Outside"], exclude = False)#"Bikes", "Danger_de_Mort", ",
 #
 
-training_dataset = pairwise_lister("/scratch/Original_LFs/png", "/scratch/HBPP/", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
+training_dataset = pairwise_lister("../../../shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
 
-test_dataset = pairwise_lister("/scratch/Original_LFs/png", "/scratch/HBPP/", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = False)
+test_dataset = pairwise_lister("../../../shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = False)
 
 
 

@@ -52,7 +52,7 @@ from space_only2x2_model import UNetSpace
 lossf = nn.MSELoss()
 
 import sys
-epochs = 20
+epochs = 100
 batches = (10,)
 lr = 1e-5
 print('batch: ', batches)
@@ -70,7 +70,7 @@ for batch in batches:
 
     print(batch)
 
-    folder = "/scratch/MSEs/" + configSaida.split('.txt')[0] + "/"
+    folder = "/home/shared/MSEs/" + configSaida.split('.txt')[0] + "/"
     os.makedirs(folder, exist_ok=True)
 
 
