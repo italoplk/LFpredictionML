@@ -73,7 +73,7 @@ for lr in lrs:
                 # track hyperparameters and run metadata
                 config={
                     **config,
-                    era:era
+                    "era":era
                 }
             )
             f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size = 10), training)
