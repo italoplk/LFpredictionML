@@ -39,9 +39,12 @@ with open("chosen_list.txt", "r") as foldfile:
     folds = json.loads(foldfile.read())
 #print(folds)
 
-
+from torch import save
 import torch.nn as nn
 from space_only2x2_model import UNetSpace
+
+import wandb
+
 
 
 
@@ -52,7 +55,7 @@ from space_only2x2_model import UNetSpace
 lossf = nn.MSELoss()
 
 import sys
-epochs = 100
+epochs = 5
 batches = (10,)
 lr = 1e-5
 print('batch: ', batches)
@@ -66,22 +69,35 @@ print('batch: ', batches)
 
 for batch in batches:
 
-    configSaida = f"quick_imgTangenteYCBCR_2k_16l_sigmoid.txt"
-
+    config_saida = f"quick_imgTangenteYCBCR_2k_16l_sigmoid.txt"
     print(batch)
 
-    folder = "/home/shared/MSEs/" + configSaida.split('.txt')[0] + "/"
+    wandb.init(
+        # set the wandb project where this run will be logged
+        project="predictorUnet",
+        # track hyperparameters and run metadata
+        config={
+            "learning_rate": 0.0005,
+            "architecture": f"{config_saida}",
+            "dataset": "EPFL",
+            "epochs": 5,
+            "name": f"{config_saida}"
+        }
+    )
+
+
+    folder = "/home/shared/MSEs/" + config_saida.split('.txt')[0] + "/"
     os.makedirs(folder, exist_ok=True)
 
 
 
-    print(configSaida + "\n", end='', file=open(folder + configSaida, 'w'))
+    print(config_saida + "\n", end='', file=open(folder + config_saida, 'w'))
 
 
     ##for i, (training, validation) in enumerate(folds):
     for i, (training, validation) in enumerate(folds):
         #if i == 0: continue
-        model_name = f"{configSaida}_{i}"
+        model_name = f"{config_saida}_{i}"
 
         folder_train = folder + f"train_fold{i}/"
         folder_validation = folder + f"validation_fold{i}/"
@@ -104,25 +120,29 @@ for batch in batches:
                 # reset file if re-simulating
            #     outputMSEs.write(f"{era}\n")
 
-            f = loop_dataset(functools.partial(train, model, folder_train, era, lossf, optimizer, batch_size=10, u=2), training)
+            f = loop_dataset(functools.partial(train,  model, folder_train, era, config_saida, lossf, optimizer, batch_size=10, u=2), training[:2])
+            save(model.state_dict(), f"model{config_saida}_{era}")
 
 
             if (era % 2 == 0):
-                print(f"{era}\t{f}", end='', file=open(folder+configSaida, 'a'))
-                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation, { "save_image" : 2} )
-                print(f'\t{val}', file=open(folder + configSaida, 'a'))
+                print(f"{era}\t{f}", end='', file=open(folder + config_saida, 'a'))
+                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation[:2], { "save_image" : 2} )
+                print(f'\t{val}', file=open(folder + config_saida, 'a'))
                 print(f'\t{val}')
+                wandb.log({"MSE": val})
             else:
-                print(f"{era}\t{f}", file=open(folder + configSaida, 'a'))
+                print(f"{era}\t{f}", file=open(folder + config_saida, 'a'))
                 print(f"{era}\t{f}")
+                wandb.log({"MSE": f})
 
             # if (era % 10 == 0):
             #     test = loop_dataset(functools.partial(test, model, lossf, optimizer),test)
 
-        model.save()
+
 
     # loop_dataset(functools.partial(reconstruct, model, folder_test, 1), test_dataset.lfs)
     loop_dataset(functools.partial(reconstruct, model, folder_test, 1), test_dataset.lfs, {'save_image' : 4}, test_dataset)
-
+    model.save()
+    wandb.finish()
 
 

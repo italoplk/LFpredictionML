@@ -8,6 +8,7 @@ import json
 from dataset_reader import reconstructor, training_dataset, fold_dataset, blocked_referencer
 from torch.utils.data import DataLoader, RandomSampler
 import numpy as np
+import wandb
 
 lfloader = functools.partial(DataLoader, batch_size=1, num_workers=1, persistent_workers=True)
 
@@ -44,8 +45,25 @@ def block_MSE_by_view(yt, yc):
     return torch.einsum('bcuvst,bcuvst->uv', diff, diff) / (diff.shape[-1] * diff.shape[-2])
 
 
+
+
+
+
 # auterar o datareader pra sair exemplos
-def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batch_size=1, u=0):
+def train(model, folder, era, config_saida, lossf, optimizer, original, decoded, lf, bpp, batch_size=1, u=0):
+    wandb.init(
+        # set the wandb project where this run will be logged
+        project="predictorUnet",
+        # track hyperparameters and run metadata
+        config={
+            "learning_rate": 0.0005,
+            "architecture": f"{config_saida}_{era}",
+            "dataset": "EPFL",
+            "epochs": 5,
+            "name": f"{config_saida}_{era}",
+        }
+    )
+
     lf = lf
     loader = blocked_referencer(decoded, original)
     acc = 0
@@ -76,8 +94,13 @@ def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batc
             k += 1
         err.cpu()
         acc += err.item()
+        #MSE DO BATCH
+        wandb.log({"acc": acc})
+    wandb.finish()
     MSE_lf = acc / i
     MSE_by_view = acc_MSE_by_view / i
+
+
 
     outfilename = f"{folder}/MSE_Views_train_{'_'.join(lf)}_{''.join(bpp)}"
 
@@ -86,7 +109,7 @@ def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batc
         # convert tensor to string
         json.dump(data, outputMSEs)
 
-    model.save()
+    # model.save()
     return (acc, i)
 
 

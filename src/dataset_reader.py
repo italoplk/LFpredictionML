@@ -1,23 +1,31 @@
-from glob import glob
-#print(glob("Original_LFs/mat/*/*")[:5])
-#print(glob("Decoded_LFs/mat/*/*/*")[:5])
 
 
-# In[2]:
+
+
+from functools import partial
+from functools import reduce as fc_reduce
+from operator import __mul__
+
+from torch.utils.data import Dataset
+
+
 
 
 #import h5py
 from glob import iglob
-import os
 import numpy as np
 import torch
-from random import shuffle, sample
 from torch.utils.data import DataLoader
+from random import shuffle, sample
+import torch
 from itertools import accumulate
-from einops import rearrange
+
 import cv2
-import einops
+# import einops
+from einops import rearrange, reduce
+from einops import EinopsError
 import os
+import sys
 from dotenv import load_dotenv
 
 class chain:
@@ -61,8 +69,7 @@ class single:
             raise IndexError(i)
         else:
             return self.f()
-import sys
-from einops import EinopsError
+
 #TODO CHECAR O -1 DUPLO
 normalizer_factor = 2/(2 ** 16 - 1)
 def read_LF_PNG(path):
@@ -167,16 +174,18 @@ class fold_dataset:
         return (index, self.lister(*index))
     def sampled(self, n):
         return (self[i] for i in sample(range(len(self)), n))
-load_dotenv()
 
-ORIGINAL_LFS_PATH = os.environ["ORIGINAL_LFS_PATH"]
-DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]
 
-training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
-test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=False)
+load_dotenv("./_italo.env")
 
-# training_dataset = pairwise_lister("../../../shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
-# test_dataset = pairwise_lister("../../../shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = False)
+# ORIGINAL_LFS_PATH = os.environ["ORIGINAL_LFS_PATH"]
+# DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]
+#
+# training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
+# test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=False)
+
+training_dataset = pairwise_lister("/home/shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = True)
+test_dataset = pairwise_lister("../../../shared/Original_LFs/png", "../../../shared/Decoded_LFs/png/32_no_partition", ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude = False)
 
 
 
@@ -192,10 +201,7 @@ test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "D
 # In[4]:
 
 
-from functools import reduce, partial
-from operator import __mul__
-import torch
-from torch.utils.data import Dataset
+
 class blocked_referencer(Dataset):
     def __init__(self, decoded, original):
         super().__init__()
@@ -208,7 +214,7 @@ class blocked_referencer(Dataset):
             assert(all(dim != 0 for dim in self.shape))
         else:
             self.shape = (0,0)
-        self.len = reduce(__mul__, self.shape, 1)
+        self.len = fc_reduce(__mul__, self.shape, 1)
     def __len__(self):
         return self.len
     def __getitem__(self, x):
@@ -263,7 +269,7 @@ class reconstructor:
     def compare(self, original):
         views_MSE = self.compare_MSE_by_view(original)
         views_PSNR = 20 * np.log(1 / views_MSE ** 0.5)
-        PSNR_channel = einops.reduce(views_PSNR, 'c s t -> c', 'mean')
+        PSNR_channel = reduce(views_PSNR, 'c s t -> c', 'mean')
         if len(PSNR_channel) == 1:
             return PSNR_channel[0]
         elif len(PSNR_channel) == 3:
@@ -276,5 +282,5 @@ class reconstructor:
         # print(reference.shape)
         diff = self.values -  reference.numpy()
         squared = np.einsum('...,...->...', diff, diff)
-        views_MSE = einops.reduce(squared, 'c s t u v -> c s t', 'mean')
+        views_MSE = reduce(squared, 'c s t u v -> c s t', 'mean')
         return views_MSE
