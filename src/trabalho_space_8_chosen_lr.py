@@ -16,6 +16,8 @@ import random
 #from torch.utils.data import DataLoader, RandomSampler
 import torch.optim as optim
 import functools
+
+import wandb
 random.seed(42)
 
 
@@ -53,11 +55,27 @@ for lr in lrs:
     for i, (training, validation) in enumerate(folds):
         if i == 0: continue
         model_name = f"space8_lr_{lr}_{i}"
+        config = {
+            "learning_rate": lr,
+            "architecture": f"{model_name}",
+            "dataset": "EPFL",
+            "epochs": epochs,
+            "name": f"{model_name}",
+        }
         model = UNetSpace(model_name)
         if torch.cuda.is_available():
             model.cuda()
         optimizer = optim.Adam(model.parameters(), lr = lr)
         for era in range(1, epochs+1):
+            wandb.init(
+                # set the wandb project where this run will be logged
+                project="predictorUnet",
+                # track hyperparameters and run metadata
+                config={
+                    **config,
+                    era:era
+                }
+            )
             f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size = 10), training)
             folder = f"{model_name}_examples/{era}/"
             os.makedirs(folder, exist_ok=True)
@@ -67,6 +85,7 @@ for lr in lrs:
                 print(f'\t{val}')            
             else:
                 print(f"{era}\t{f}")
+            wandb.finish()
         
 # In[ ]:
 
