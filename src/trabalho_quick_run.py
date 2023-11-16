@@ -80,7 +80,7 @@ for lr in lrs:
             os.makedirs(folder, exist_ok=True)
             f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size = 10), training[:1])
             print(f"{era}\t{f}", end='')
-            val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation[:1])
+            val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation[:1], mark={'save_image', 2})
             print(f'\t{val}')
             wandb.finish()
         
