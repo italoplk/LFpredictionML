@@ -78,7 +78,7 @@ for lr in lrs:
             )
             folder = f"{model_name}_results/{era}"
             os.makedirs(folder, exist_ok=True)
-            f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size = 10, config=config), training[:1])
+            f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size = 10), training[:1])
             print(f"{era}\t{f}", end='')
             val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation[:1])
             print(f'\t{val}')
