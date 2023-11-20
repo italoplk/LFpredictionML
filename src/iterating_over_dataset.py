@@ -16,6 +16,14 @@ make_dataloader = functools.partial(DataLoader, batch_size=5, num_workers=2, pre
 
 
 def loop_dataset(action, lfs, mark: Dict[str, int] = dict(), dataset=training_dataset):
+    """
+        action: função a ser chamada(treinamento ou validação ou teste)... com o LF original, o decodificado, o nome LF, o BPP...
+            ... e possivelmente "marcas"(flags True/False determinadas pela entrada mark)
+        lfs: uma lista de (classe, nome) de LFs
+        mark: parâmetro opcional(vazio por padrão), um dicionário com chaves string e valor um número que diz LFs terão que actions vão receber o parâmetro <chave> com True
+
+        dataset: training_dataset ou testing_dataset
+    """
     acc = 0
     i = 0
     # print(len(lfs))
