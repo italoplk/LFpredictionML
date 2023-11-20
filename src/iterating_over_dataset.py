@@ -50,7 +50,7 @@ def block_MSE_by_view(yt, yc):
 
 
 # auterar o datareader pra sair exemplos
-def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batch_size=1, u=0):
+def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batch_size=1, u=1):
     lf = lf
     loader = blocked_referencer(decoded, original)
     acc = 0
@@ -58,6 +58,7 @@ def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batc
     i = 0
     k = 0
     acc_MSE_by_view = 0
+    optimizer.zero_grad()
     for inpt, yt in make_dataloader(loader, batch_size=batch_size):
         i += inpt.shape[0]
         # print(inpt.shape)
@@ -71,18 +72,24 @@ def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batc
         err = lossf(yt, y)
 
         acc_MSE_by_view += block_MSE_by_view(yt, y)
+
+
+        err.backward()
+        k += 1
         if k == u:
-            err.backward()
             # utils.clip_grad_norm_(model.parameters(), 1)
             optimizer.step()
             optimizer.zero_grad()
             k = 0
-        else:
-            k += 1
         err.cpu()
         acc += err.item()
         #MSE DO BATCH
         wandb.log({"acc": acc})
+    # Se "sobrou" batches
+    if k != 0:
+        optimizer.step()
+        optimizer.zero_grad()
+
     MSE_lf = acc / i
     MSE_by_view = acc_MSE_by_view / i
 
