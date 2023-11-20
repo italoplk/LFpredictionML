@@ -37,7 +37,14 @@ def loop_dataset(action, lfs, mark: Dict[str, int] = dict(), dataset=training_da
 
 
 def loop_in_lf(action, lf, dataloader, **marks):
-    original = next(dataloader)
+    """
+        action: função(treinamento) a ser chamada...pelo LF origina, o decodificado, o nome LF, o BPP...
+            ... e possivelmente "marcas"(flags True/False determinadas pela marks) como argumentos por nome
+        lf: o nome do LF a ser
+        dataloader: sequência de LFs definida pelo dataset.read_pair
+        **marks: flags a serem passadas em action
+    """
+    original = next(dataloader)# O primeiro LF da sequência é sempre o original
     acc = 0
     i = 0
     for bpp, decoded in dataloader:
