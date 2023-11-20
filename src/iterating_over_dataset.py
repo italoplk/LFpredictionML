@@ -3,12 +3,14 @@ from typing import Dict
 import torch
 import torch.nn as nn
 import torch.nn.utils as utils
+from torch.optim import Optimizer
 import random
 import json
 from dataset_reader import reconstructor, training_dataset, fold_dataset, blocked_referencer
 from torch.utils.data import DataLoader, RandomSampler
 import numpy as np
 import wandb
+from typing import Callable
 
 lfloader = functools.partial(DataLoader, batch_size=1, num_workers=1, persistent_workers=True)
 
@@ -65,7 +67,21 @@ def block_MSE_by_view(yt, yc):
 
 
 # auterar o datareader pra sair exemplos
-def train(model, folder, era, lossf, optimizer, original, decoded, lf, bpp, batch_size=1, u=1):
+def train(model : nn.Module, folder : str, era : int, lossf : Callable[[torch.Tensor], torch.Tensor],
+           optimizer : Optimizer, original : np.ndarray, decoded : np.ndarray, lf : str, bpp : str, batch_size : int = 1, u : int=1):
+    """
+        model: modelo a ser treinado
+        folder: pasta para o qual os logs do MSE/view serão mandados
+        era: época atual
+        lossf: Função de perda
+        optimizer: otimizador de pesos usado
+        original: LF original, em 4d
+        decoded: LF decodificado, em 4d
+        lf: string com o nome do LF
+        bpp: string com o bpp do lightfield decodificado atual
+        batch_size: tamanho do batch
+        u: quantas vezes iterar antes de atualizar os pesos, multiplica o tamanho do batch ao custo de tempo ao invés de memória
+    """
     lf = lf
     loader = blocked_referencer(decoded, original)
     acc = 0
