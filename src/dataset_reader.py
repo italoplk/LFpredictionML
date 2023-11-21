@@ -163,6 +163,20 @@ class pairwise_lister:
         data = chain(original, mymap(decoded, bpps))
         return data
 
+class self_pairer:
+    def __init__(self, originals : str):
+        self.originals = originals
+        self.original_paths = tuple(iglob(f"{originals}/*/*.png"))
+        keys = (path.split('/')[-2:] for path in self.original_paths)
+        self.lf_by_class_and_name = { (key[0], key[1].split('.')[0]) : path for key, path in zip(keys, self.original_paths) }
+        #print(list(self.lf_by_class_and_name.keys()))
+    def read_pair(self, lfclass, lf) -> torch.Tensor:
+        path = self.lf_by_class_and_name[(lfclass, lf)]
+        data = read_LF(path)
+        return (data, ('no bpp', data)) # tensor is not copied
+
+
+
 class fold_dataset:
     def __init__(self, lister, elems):
         self.elems = list(elems)
@@ -177,10 +191,11 @@ class fold_dataset:
 load_dotenv()
 
 ORIGINAL_LFS_PATH = os.environ["ORIGINAL_LFS_PATH"]
-DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]
+#DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]
 
-training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
-test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=False)
+training_dataset = self_pairer(ORIGINAL_LFS_PATH)
+#training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
+#test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=False)
 
 
 #display(list((k, v) for k,v in training_dataset.bbps.items() if len(v) != 5)[:5])
