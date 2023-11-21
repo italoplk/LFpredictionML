@@ -181,8 +181,9 @@ def reconstruct(model, folder, era, original, decoded, lf, bpp, save_image):
     # print(acc)
     # fprint(reconstruc.i, reconstruc.cap)
     if save_image:
-        print(f"{folder}{''.join(lf)}_{''.join(bpp)}")
-        reconstruc.save_image(f"{folder}{''.join(lf)}_{''.join(bpp)}")
+        path = f"{folder}{''.join(lf)}.png"
+        #print(path)
+        reconstruc.save_image(path)
     # raise StopIteration(acc / i)
     mse_view = reconstruc.compare_MSE_by_view(original)
     mse_lf = reconstruc.compare(original)

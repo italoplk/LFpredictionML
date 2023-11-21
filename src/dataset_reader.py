@@ -100,6 +100,7 @@ def write_LF_PMG(image, path):
     image = unnormalize_to_16bit_image(image)
     #image = cv2.cvtColor(image, cv2.COLOR_YCrCb2BGR)
     #print(image.shape)
+    #print(path)
     cv2.imwrite(f'{path}', image)
 
 def read_LF(path):
@@ -271,9 +272,7 @@ class reconstructor:
         self.i = new_i
     def save_image(self, filename):
         #print(self.shape)
-        folder = '/'.join(filename.split('/')[:-1])
-        print(folder)
-        write_LF_PMG(self.values, folder)
+        write_LF_PMG(self.values, filename)
 
     def compare(self, original):
         views_MSE = self.compare_MSE_by_view(original)
