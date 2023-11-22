@@ -23,7 +23,7 @@ import itertools
 
 
 from iterating_over_dataset import loop_dataset, reconstruct, train, test
-from dataset_reader import test_dataset
+# from dataset_reader import test_dataset
 
 def random_split_n(data, kfolds):
     random.shuffle(data)
@@ -94,13 +94,13 @@ for batch in batches:
     print(config_saida + "\n", end='', file=open(folder + config_saida, 'w'))
 
 
-    ##for i, (training, validation) in enumerate(folds):
-    for i, (training, validation) in enumerate(folds):
-        #if i == 0: continue
-        model_name = f"{config_saida}_{i}"
+    ##for fold, (training, validation) in enumerate(folds):
+    for fold, (training, validation) in enumerate(folds):
+        #if fold == 0: continue
+        model_name = f"{config_saida}_{fold}"
 
-        folder_train = folder + f"train_fold{i}/"
-        folder_validation = folder + f"validation_fold{i}/"
+        folder_train = folder + f"train_fold{fold}/"
+        folder_validation = folder + f"validation_fold{fold}/"
         folder_test = folder + f"test_output/"
         os.makedirs(folder_train, exist_ok=True)
         os.makedirs(folder_validation, exist_ok=True)
@@ -120,13 +120,13 @@ for batch in batches:
                 # reset file if re-simulating
            #     outputMSEs.write(f"{era}\n")
 
-            f = loop_dataset(functools.partial(train,  model, folder_train, era, config_saida, lossf, optimizer, batch_size=10, u=2), training[:2])
+            f = loop_dataset(functools.partial(train,  model, folder_train, era, config_saida, lossf, optimizer, batch_size=10, u=2), training[:1])
             save(model.state_dict(), f"model{config_saida}_{era}")
 
 
             if (era % 2 == 0):
                 print(f"{era}\t{f}", end='', file=open(folder + config_saida, 'a'))
-                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation[:2], { "save_image" : 2} )
+                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation[:1], { "save_image" : 2} )
                 print(f'\t{val}', file=open(folder + config_saida, 'a'))
                 print(f'\t{val}')
                 wandb.log({"MSE": val})
@@ -141,7 +141,7 @@ for batch in batches:
 
 
     # loop_dataset(functools.partial(reconstruct, model, folder_test, 1), test_dataset.lfs)
-    loop_dataset(functools.partial(reconstruct, model, folder_test, 1), test_dataset.lfs, {'save_image' : 4}, test_dataset)
+    # loop_dataset(functools.partial(reconstruct, model, folder_test, 1), test_dataset.lfs, {'save_image' : 4}, test_dataset)
     model.save()
     wandb.finish()
 
