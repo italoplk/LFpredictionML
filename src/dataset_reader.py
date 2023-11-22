@@ -103,12 +103,19 @@ def write_LF_PMG(image, path):
     #print(path)
     cv2.imwrite(f'{path}', image)
 
-def read_LF(path):
+def read_LF(path, **kwargs):
+    """
+        path : path to the image to be read
+        s, t, u, v : optional argumets... s and t assumed to be 13 if nothing is supplied;
+            if supplied, then at least one in each {s, u}, {t, v} needs to be supplied...
+            the image dimensions *must* be a multiple of them;
+    """
+    dims = kwargs if len(kwargs) != 0 else { 's' : 13, 't' : 13}
     img = read_LF_PNG(path)
     img_ycbcr = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
     img_normalized = normalize_16bit_image(img_ycbcr)
     try:
-        return rearrange(img_normalized, '(s u) (t v) c -> c s t u v', s=13, t=13)[:1, :, :, :, :]
+        return rearrange(img_normalized, '(s u) (t v) c -> c s t u v', **dims)[:1, :, :, :, :]
     except EinopsError:
         print(f"failed to read {path}", file=sys.stderr)
         return np.zeros((3,1,1,1,1))
