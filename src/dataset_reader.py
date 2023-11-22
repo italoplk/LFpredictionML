@@ -130,7 +130,6 @@ def read_LF_lenslet(path : str) -> torch.Tensor:
     img_ycbcr = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
     img_normalized_y = normalize_16bit_image(img_ycbcr)[1:, :, :]
     img_color_in_front = rearrange(img_normalized_y, '... c -> c ...')
-    print(img_color_in_front.shape)
     return img_color_in_front
 
 on_the_list = lambda candidate, l: any(test in candidate for test in l)
