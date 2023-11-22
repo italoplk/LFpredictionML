@@ -7,7 +7,7 @@ import torch.nn.utils as utils
 from torch.optim import Optimizer
 import random
 import json
-from dataset_reader import reconstructor, training_dataset, fold_dataset, lenslet_blocked_referencer
+from dataset_reader import reconstructor_lenslet, training_dataset, fold_dataset, lenslet_blocked_referencer
 from torch.utils.data import DataLoader, RandomSampler
 import numpy as np
 import wandb
@@ -166,7 +166,7 @@ def reconstruct(model, folder, era, fold, original, decoded, lf, bpp, save_image
     acc = 0
     # model.cuda()
     model.eval()
-    reconstruc = reconstructor(original.shape, 32)
+    reconstruc = reconstructor_lenslet(original.shape, 32, 9)
     for inpt, yt in DataLoader(loader, batch_size=10, num_workers=2, prefetch_factor=5, persistent_workers=True):
         y = model(inpt.cuda() if torch.cuda.is_available() else inpt)
         # y = model(inpt)
