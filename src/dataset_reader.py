@@ -104,6 +104,13 @@ def write_LF_PMG(image, path):
     #print(path)
     cv2.imwrite(f'{path}', image)
 
+def write_LF_PNG_lenslet(image, path):
+    image = unnormalize_to_16bit_image(image)
+    #image = cv2.cvtColor(image, cv2.COLOR_YCrCb2BGR)
+    #print(image.shape)
+    #print(path)
+    cv2.imwrite(f'{path}', image)
+
 def read_LF(path : str, **kwargs : int) -> torch.Tensor:
     """
         path : path to the image to be read
@@ -346,4 +353,52 @@ class reconstructor:
         diff = self.values -  reference.numpy()
         squared = np.einsum('...,...->...', diff, diff)
         views_MSE = reduce(squared, 'c s t u v -> c s t', 'mean')
+        return views_MSE
+
+class reconstructor_lenslet:
+    def __init__(self, shape, N, MI_SIZE=13):
+        self.MI_SIZE = MI_SIZE
+        self.N = N * MI_SIZE
+        self.block_shape = tuple(dim // self.N - 1 for dim in shape[-2:])
+        self.shape = (shape[-3], *(dim * self.N for dim in self.block_shape))
+        self.values = np.zeros(self.shape, dtype=np.float32)
+        self.i = 0
+        self.cap = np.prod(self.block_shape)
+    def calculate_coordinate(self, i):
+        x = self.i + i
+        i, j = (x % self.block_shape[0], x // self.block_shape[0])
+        return (i,j)
+    def add_blocks(self, blocks):
+        new_i = blocks.shape[0] + self.i
+        assert(new_i <= self.cap)
+        #print(tuple(blocks.shape[1:]))
+        #print((*self.shape[:-2], self.N, self.N))
+        assert(tuple(blocks.shape[1:]) == (self.N, self.N))
+        #blocks = blocks.astype(np.int16)
+        for i in range(blocks.shape[0]):
+            x,y = self.calculate_coordinate(i)
+            #print(blocks[i, :, :, :, :].shape)
+            #print(self.values[:, :, :, x*self.N:(x+1)*self.N, y*self.N:(y+1)*self.N].shape)
+            self.values[:, x*self.N:(x+1)*self.N, y*self.N:(y+1)*self.N] = blocks[i, :, :]
+        self.i = new_i
+    def save_image(self, filename):
+        #print(self.shape)
+        write_LF_PNG_lenslet(self.values, filename)
+    def compare(self, original):
+        views_MSE = self.compare_MSE_by_view(original)
+        views_PSNR = 20 * np.log(1 / views_MSE ** 0.5)
+        PSNR_channel = reduce(views_PSNR, 'c s t -> c', 'mean')
+        if len(PSNR_channel) == 1:
+            return PSNR_channel[0]
+        elif len(PSNR_channel) == 3:
+            return (6 * PSNR_channel[0] + 1 * PSNR_channel[1] + 1 * PSNR_channel[2]) / 8
+
+    def compare_MSE_by_view(self, original):
+        if original.shape[0] not in (1, 3):
+            raise ValueError("Expected LF to have either 1 or 3 color channels, found {original.shape[0]}")
+        reference = original[0, :, self.N:self.N + self.shape[-2], self.N:self.N + self.shape[-1]]
+        # print(reference.shape)
+        diff = self.values -  reference.numpy()
+        squared = np.einsum('...,...->...', diff, diff)
+        views_MSE = reduce(squared, 'c (u s) (v t) -> c s t', 'mean', s=self.MI_SIZE, t=self.MI_SIZE)
         return views_MSE
