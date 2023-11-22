@@ -5,6 +5,7 @@
 from functools import partial
 from functools import reduce as fc_reduce
 from operator import __mul__
+from typing import Callable
 
 from torch.utils.data import Dataset
 
@@ -182,15 +183,16 @@ class pairwise_lister:
         return data
 
 class self_pairer:
-    def __init__(self, originals : str):
+    def __init__(self, originals : str, read_from_LF : Callable[[str], torch.Tensor] = read_LF):
         self.originals = originals
         self.original_paths = tuple(iglob(f"{originals}/*/*.png"))
+        self.read_from_LF = read_from_LF
         keys = (path.split('/')[-2:] for path in self.original_paths)
         self.lf_by_class_and_name = { (key[0], key[1].split('.')[0]) : path for key, path in zip(keys, self.original_paths) }
         #print(list(self.lf_by_class_and_name.keys()))
-    def read_pair(self, lfclass, lf) -> torch.Tensor:
+    def read_pair(self, lfclass, lf) -> tuple[torch.Tensor, tuple[str, torch.Tensor]]:
         path = self.lf_by_class_and_name[(lfclass, lf)]
-        data = read_LF(path)
+        data = self.read_from_LF(path)
         return (data, ('no bpp', data)) # tensor is not copied
 
 
