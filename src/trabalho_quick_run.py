@@ -37,6 +37,7 @@ with open("chosen_list.txt", "r") as foldfile:
 #print(folds)
 
 from iterating_over_dataset import loop_dataset, reconstruct, train, test
+from dataset_reader import training_dataset
 import torch.nn as nn
 
 epochs = 1
@@ -78,7 +79,7 @@ for lr in lrs:
             )
             folder = f"{model_name}_results/{era}"
             os.makedirs(folder, exist_ok=True)
-            f = loop_dataset(functools.partial(train, model, folder, era, lossf, optimizer, batch_size = 10), training[:1])
+            f = loop_dataset(functools.partial(train, model, folder, era, i, lossf, optimizer, batch_size = 10), list(training_dataset.lf_by_class_and_name.keys()))
             print(f"{era}\t{f}", end='')
             val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation[:1], mark={'save_image' : 2})
             print(f'\t{val}')

@@ -1,12 +1,13 @@
 import functools
 from typing import Dict
+from einops import rearrange
 import torch
 import torch.nn as nn
 import torch.nn.utils as utils
 from torch.optim import Optimizer
 import random
 import json
-from dataset_reader import reconstructor, training_dataset, fold_dataset, blocked_referencer
+from dataset_reader import reconstructor, training_dataset, fold_dataset, lenslet_blocked_referencer
 from torch.utils.data import DataLoader, RandomSampler
 import numpy as np
 import wandb
@@ -83,7 +84,7 @@ def block_MSE_by_view(yt, yc):
 def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callable[[torch.Tensor], torch.Tensor],
            optimizer : Optimizer, original : np.ndarray, decoded : np.ndarray, lf : str, bpp : str, batch_size : int = 1, u : int=1):
     lf = lf
-    loader = blocked_referencer(decoded, original)
+    loader = lenslet_blocked_referencer(decoded, original, MI_size=9)
     acc = 0
     model.train()
     i = 0
@@ -97,7 +98,7 @@ def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callab
         if torch.cuda.is_available():
             inpt = inpt.cuda()
         y = model(inpt)
-        yt = yt[:, :, :, :, 32:, 32:]
+        yt = yt[:, :,  9*32:, 9*32:]
         if torch.cuda.is_available():
             yt = yt.cuda()
         err = lossf(yt, y)
@@ -142,7 +143,7 @@ lossf = nn.MSELoss()
 
 def test(model, original, decoded, *lf):
     lf = lf
-    loader = blocked_referencer(decoded, original)
+    loader = lenslet_blocked_referencer(decoded, original)
     acc = 0
     model.eval()
     i = 0
@@ -159,7 +160,7 @@ def test(model, original, decoded, *lf):
 
 
 def reconstruct(model, folder, era, fold, original, decoded, lf, bpp, save_image):
-    loader = blocked_referencer(decoded, original)
+    loader = lenslet_blocked_referencer(decoded, original)
     i = 0
     acc = 0
     # model.cuda()
