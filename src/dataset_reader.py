@@ -266,6 +266,39 @@ class blocked_referencer(Dataset):
         #print(neighborhood.shape)
         return neighborhood, expected_block
 
+class lenslet_blocked_referencer(Dataset):
+    def __init__(self, decoded, original, MI_size=13):
+        super().__init__()
+        self.decoded = decoded[0, :1, :, :]
+        self.original = original[0, :1, :, :]
+        self.N = 32 * MI_size
+        self.inner_shape = decoded.shape
+        if(decoded.shape == original.shape):
+            self.shape = tuple(dim // self.N - 1 for dim in self.inner_shape[-2:])
+            assert(all(dim != 0 for dim in self.shape))
+        else:
+            self.shape = (0,0)
+        self.len = fc_reduce(__mul__, self.shape, 1)
+    def __len__(self):
+        return self.len
+    def __getitem__(self, x):
+        if x < -len(self) or x >= len(self):
+            raise IndexError(x)
+        elif x < 0:
+            x += len(self)
+        i, j = (x % self.shape[0], x // self.shape[0])
+        section = self.decoded[:, i * self.N : (i+2) * self.N, j * self.N : (j+2) * self.N]
+        """neighborhood = torch.ones(section.shape[0] + 1, *section.shape[1:], dtype=torch.float32)
+        neighborhood[:-1, :, :, :, :] = section.to(neighborhood)
+        neighborhood[:, :, :, self.N:, self.N:] = 0
+        expected_block = self.original[:, :, :, i * self.N : (i+2) * self.N, j * self.N : (j+2) * self.N].to(neighborhood)"""
+        neighborhood = torch.zeros(section.shape[0], *section.shape[1:], dtype=torch.float32)
+        neighborhood[:, :, :] = section.to(neighborhood)
+        neighborhood[:, self.N:, self.N:] = neighborhood[:, :, :, :self.N, :self.N].flip((-1,-2))
+        expected_block = self.original[:, i * self.N : (i+2) * self.N, j * self.N : (j+2) * self.N].to(neighborhood)
+        #print(neighborhood.shape)
+        return neighborhood, expected_block
+
 class reconstructor:
     def __init__(self, shape, N):
         self.N = N
