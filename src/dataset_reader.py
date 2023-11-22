@@ -192,7 +192,7 @@ class fold_dataset:
 
 load_dotenv("_dl4_LL.env")
 
-ORIGINAL_LFS_PATH = os.environ["ORIGINAL_LFS_PATH"]
+ORIGINAL_LFS_PATH = os.environ["ORIGINAL_LFS_MV_RGB_9views"]
 #DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]
 
 training_dataset = self_pairer(ORIGINAL_LFS_PATH)

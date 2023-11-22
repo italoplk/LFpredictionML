@@ -67,9 +67,7 @@ def block_MSE_by_view(yt, yc):
 
 
 # auterar o datareader pra sair exemplos
-def train(model : nn.Module, folder : str, era : int, lossf : Callable[[torch.Tensor], torch.Tensor],
-           optimizer : Optimizer, original : np.ndarray, decoded : np.ndarray, lf : str, bpp : str, batch_size : int = 1, u : int=1):
-    """
+"""
         model: modelo a ser treinado
         folder: pasta para o qual os logs do MSE/view serão mandados
         era: época atual
@@ -82,6 +80,8 @@ def train(model : nn.Module, folder : str, era : int, lossf : Callable[[torch.Te
         batch_size: tamanho do batch
         u: quantas vezes iterar antes de atualizar os pesos, multiplica o tamanho do batch ao custo de tempo ao invés de memória
     """
+def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callable[[torch.Tensor], torch.Tensor],
+           optimizer : Optimizer, original : np.ndarray, decoded : np.ndarray, lf : str, bpp : str, batch_size : int = 1, u : int=1):
     lf = lf
     loader = blocked_referencer(decoded, original)
     acc = 0
@@ -104,7 +104,6 @@ def train(model : nn.Module, folder : str, era : int, lossf : Callable[[torch.Te
 
         acc_MSE_by_view += block_MSE_by_view(yt, y)
 
-
         err.backward()
         k += 1
         if k == u:
@@ -114,13 +113,14 @@ def train(model : nn.Module, folder : str, era : int, lossf : Callable[[torch.Te
             k = 0
         err.cpu()
         acc += err.item()
-        #MSE DO BATCH
-        wandb.log({"acc": acc})
-    # Se "sobrou" batches
+        #Batch MSE
+        wandb.log({f"Batch_MSE_era_{era}_fold{fold}": acc / i})
+    # Se "sobrou" batch
     if k != 0:
         optimizer.step()
         optimizer.zero_grad()
 
+    wandb.log({f"MSE_{lf[0]}_{lf[1]}_fold{fold}": acc/i})
     MSE_lf = acc / i
     MSE_by_view = acc_MSE_by_view / i
 
@@ -158,7 +158,7 @@ def test(model, original, decoded, *lf):
     return (acc, i)
 
 
-def reconstruct(model, folder, era, original, decoded, lf, bpp, save_image):
+def reconstruct(model, folder, era, fold, original, decoded, lf, bpp, save_image):
     loader = blocked_referencer(decoded, original)
     i = 0
     acc = 0
@@ -178,6 +178,8 @@ def reconstruct(model, folder, era, original, decoded, lf, bpp, save_image):
         i += y.shape[0]
         # reconstruc.add_blocks(yt[:,:,:,:,32:,32:].cpu().detach().numpy())
         # print(yt.shape[0])
+        wandb.log({f"Batch_MSE_era_{era}_fold{fold}": acc/i})
+    wandb.log({f"MSE_{lf[0]}_{lf[1]}_fold{fold}": acc / i})
     # print(acc)
     # fprint(reconstruc.i, reconstruc.cap)
     if save_image:

@@ -76,6 +76,7 @@ for batch in batches:
         # set the wandb project where this run will be logged
         project="predictorUnet",
         # track hyperparameters and run metadata
+        name=config_saida,
         config={
             "learning_rate": 0.0005,
             "architecture": f"{config_saida}",
@@ -120,13 +121,13 @@ for batch in batches:
                 # reset file if re-simulating
            #     outputMSEs.write(f"{era}\n")
 
-            f = loop_dataset(functools.partial(train,  model, folder_train, era, config_saida, lossf, optimizer, batch_size=10, u=2), training[:1])
+            f = loop_dataset(functools.partial(train,  model, folder_train, era, fold, lossf, optimizer, batch_size=batch, u=1), training)
             save(model.state_dict(), f"model{config_saida}_{era}")
 
 
             if (era % 2 == 0):
                 print(f"{era}\t{f}", end='', file=open(folder + config_saida, 'a'))
-                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation[:1], { "save_image" : 2} )
+                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era, fold), validation, { "save_image" : 2} )
                 print(f'\t{val}', file=open(folder + config_saida, 'a'))
                 print(f'\t{val}')
                 wandb.log({"MSE": val})
