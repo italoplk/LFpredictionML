@@ -120,6 +120,16 @@ def read_LF(path : str, **kwargs : int) -> torch.Tensor:
         print(f"failed to read {path}", file=sys.stderr)
         return torch.zeros((3,1,1,1,1))
 
+def read_LF_lenslet(path : str) -> torch.Tensor:
+    """
+        path : path to the image to be read
+        Will return a 2d tensor... NOT A 4D ONE!
+    """
+    img = read_LF_PNG(path)
+    img_ycbcr = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
+    img_normalized = normalize_16bit_image(img_ycbcr)
+    return img_normalized
+
 on_the_list = lambda candidate, l: any(test in candidate for test in l)
 #modificar pairwise para retornar uma lista de blocos
 class pairwise_lister:
