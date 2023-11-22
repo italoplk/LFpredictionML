@@ -103,7 +103,7 @@ def write_LF_PMG(image, path):
     #print(path)
     cv2.imwrite(f'{path}', image)
 
-def read_LF(path, **kwargs):
+def read_LF(path : str, **kwargs : int) -> torch.Tensor:
     """
         path : path to the image to be read
         s, t, u, v : optional argumets... s and t assumed to be 13 if nothing is supplied;
@@ -118,7 +118,7 @@ def read_LF(path, **kwargs):
         return rearrange(img_normalized, '(s u) (t v) c -> c s t u v', **dims)[:1, :, :, :, :]
     except EinopsError:
         print(f"failed to read {path}", file=sys.stderr)
-        return np.zeros((3,1,1,1,1))
+        return torch.zeros((3,1,1,1,1))
 
 on_the_list = lambda candidate, l: any(test in candidate for test in l)
 #modificar pairwise para retornar uma lista de blocos
