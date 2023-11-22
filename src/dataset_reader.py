@@ -216,7 +216,7 @@ load_dotenv("_dl4_LL.env")
 ORIGINAL_LFS_PATH = os.environ["ORIGINAL_LFS_MV_RGB_9views"]
 #DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]
 
-training_dataset = self_pairer(ORIGINAL_LFS_PATH)
+training_dataset = self_pairer(ORIGINAL_LFS_PATH, read_from_LF=read_LF_lenslet)
 #training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
 # test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=False)
 # test_dataset = self_pairer(ORIGINAL_LFS_PATH)
