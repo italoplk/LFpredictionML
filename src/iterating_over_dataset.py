@@ -58,8 +58,9 @@ def loop_in_lf(action, lf, dataloader, **marks):
     return acc, i
 
 
-def block_MSE_by_view(yt, yc):
+def block_MSE_by_view(yt, yc, MI_size=13):
     diff = yt - yc
+    diff = rearrange(diff, 'b c (u s) (v t) -> b c s t u v', s = MI_size,  t = MI_size)
     return torch.einsum('bcuvst,bcuvst->uv', diff, diff) / (diff.shape[-1] * diff.shape[-2])
 
 
@@ -103,7 +104,7 @@ def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callab
             yt = yt.cuda()
         err = lossf(yt, y)
 
-        acc_MSE_by_view += block_MSE_by_view(yt, y)
+        acc_MSE_by_view += block_MSE_by_view(yt, y, MI_size=9)
 
         err.backward()
         k += 1

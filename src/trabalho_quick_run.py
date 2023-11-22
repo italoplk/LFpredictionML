@@ -42,7 +42,7 @@ import torch.nn as nn
 
 epochs = 1
 
-from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
+from angle_model_8_y import UNetAngle
 
 import sys
 lrs = (1e-4,) if (len(sys.argv) < 2) else tuple(map(float, sys.argv[1:]))
@@ -54,7 +54,7 @@ for lr in lrs:
     print(lr)
     for i, (training, validation) in enumerate(folds):
         if i == 0: continue
-        model_name = f"space8_lr_{lr}_{i}"
+        model_name = f"angle8_lr_{lr}_{i}"
         config = {
             "learning_rate": str(lr),
             "architecture": f"{model_name}",
@@ -63,7 +63,7 @@ for lr in lrs:
             "fold" : str(i),
             "name": f"{model_name}",
         }
-        model = UNetSpace(model_name)
+        model = UNetAngle(model_name)
         if torch.cuda.is_available():
             model.cuda()
         optimizer = optim.Adam(model.parameters(), lr = lr)
