@@ -82,7 +82,7 @@ def block_MSE_by_view(yt, yc, MI_size=13):
         batch_size: tamanho do batch
         u: quantas vezes iterar antes de atualizar os pesos, multiplica o tamanho do batch ao custo de tempo ao invés de memória
     """
-def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callable[[torch.Tensor], torch.Tensor],
+def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callable[[torch.Tensor,torch.Tensor], torch.Tensor],
            optimizer : Optimizer, original : np.ndarray, decoded : np.ndarray, lf : str, bpp : str, batch_size : int = 1, u : int=1):
     lf = lf
     loader = lenslet_blocked_referencer(decoded, original, MI_size=9)
