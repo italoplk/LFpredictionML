@@ -161,7 +161,7 @@ def test(model, original, decoded, *lf):
 
 
 def reconstruct(model, folder, era, fold, original, decoded, lf, bpp, save_image):
-    loader = lenslet_blocked_referencer(decoded, original)
+    loader = lenslet_blocked_referencer(decoded, original,MI_size=9)
     i = 0
     acc = 0
     # model.cuda()
@@ -172,7 +172,7 @@ def reconstruct(model, folder, era, fold, original, decoded, lf, bpp, save_image
         # y = model(inpt)
         blocks = y
         # err = lossf(yt[:,:,:,:,32:,32:].cuda(), blocks).item()
-        yt = yt[:, :, :, :, 32:, 32:]
+        yt = yt[:, :, 9*32:, 9*32:]
         yt = yt.cuda() if torch.cuda.is_available() else yt
         err = lossf(yt, blocks).item()
         reconstruc.add_blocks(blocks.cpu().detach().numpy())

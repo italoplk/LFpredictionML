@@ -76,12 +76,12 @@ for lr in lrs:
                     **config,
                     "era":str(era)
                 }
-            )
+            )"""
             folder = f"{model_name}_results/{era}"
             os.makedirs(folder, exist_ok=True)
-            f = loop_dataset(functools.partial(train, model, folder, era, i, lossf, optimizer, batch_size = 10), list(training_dataset.lf_by_class_and_name.keys()))
+            f = loop_dataset(functools.partial(train, model, folder, era, i, lossf, optimizer, batch_size = 10), training[:1])
             print(f"{era}\t{f}", end='')
-            val = loop_dataset(functools.partial(reconstruct, model, folder, era), validation[:1], mark={'save_image' : 2})
+            val = loop_dataset(functools.partial(reconstruct, model, folder, era, i), validation[:1], mark={'save_image' : 2})
             print(f'\t{val}')
             wandb.finish()
         

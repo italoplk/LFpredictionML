@@ -106,6 +106,7 @@ def write_LF_PMG(image, path):
 
 def write_LF_PNG_lenslet(image, path):
     image = unnormalize_to_16bit_image(image)
+    image = rearrange(image, 'c h w ->  w h c')
     #image = cv2.cvtColor(image, cv2.COLOR_YCrCb2BGR)
     #print(image.shape)
     #print(path)
@@ -135,7 +136,7 @@ def read_LF_lenslet(path : str) -> torch.Tensor:
     """
     img = read_LF_PNG(path)
     img_ycbcr = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
-    img_normalized_y = normalize_16bit_image(img_ycbcr)[1:, :, :]
+    img_normalized_y = normalize_16bit_image(img_ycbcr)[:, :, :1]
     img_color_in_front = rearrange(img_normalized_y, '... c -> c ...')
     return img_color_in_front
 
@@ -371,9 +372,7 @@ class reconstructor_lenslet:
     def add_blocks(self, blocks):
         new_i = blocks.shape[0] + self.i
         assert(new_i <= self.cap)
-        #print(tuple(blocks.shape[1:]))
-        #print((*self.shape[:-2], self.N, self.N))
-        assert(tuple(blocks.shape[1:]) == (self.N, self.N))
+        assert(tuple(blocks.shape[1:]) == (*self.shape[:-2], self.N, self.N))
         #blocks = blocks.astype(np.int16)
         for i in range(blocks.shape[0]):
             x,y = self.calculate_coordinate(i)
