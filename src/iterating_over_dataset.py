@@ -113,10 +113,10 @@ def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callab
             optimizer.step()
             optimizer.zero_grad()
             k = 0
-        err.cpu()
-        acc += err.item()
+        err = err.cpu().item()
+        acc += err
         #Batch MSE
-        wandb.log({f"Batch_MSE_era_{era}_fold{fold}": acc / i})
+        wandb.log({f"Batch_MSE_era_{era}_fold{fold}": err})
     # Se "sobrou" batch
     if k != 0:
         optimizer.step()
