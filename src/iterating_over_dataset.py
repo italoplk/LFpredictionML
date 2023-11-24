@@ -83,7 +83,8 @@ def train(model, folder, era, fold, config_saida, lossf, optimizer, original, de
         acc += err.item()
         #MSE DO BATCH
         wandb.log({f"Batch_MSE_era_{era}_fold_{fold}": err})
-    wandb.log({f"acc_{config_saida}_{lf}_{era}": acc})
+        wandb.log({f"MSE_{lf[0]}_{lf[1]}_fold{fold}": err})
+    wandb.log({f"acc_{config_saida}_{lf[0]}_{lf[1]}_{era}": acc})
     MSE_lf = acc / i
     MSE_by_view = acc_MSE_by_view / i
 

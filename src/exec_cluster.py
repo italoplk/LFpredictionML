@@ -55,7 +55,7 @@ import wandb
 lossf = nn.MSELoss()
 
 import sys
-epochs = 5
+epochs = 20
 batches = (10,)
 lr = 1e-5
 print('batch: ', batches)
@@ -121,13 +121,13 @@ for batch in batches:
                 # reset file if re-simulating
            #     outputMSEs.write(f"{era}\n")
 
-            f = loop_dataset(functools.partial(train,  model, folder_train, era, fold, config_saida, lossf, optimizer, batch_size=batch, u=1), training[:2])
+            f = loop_dataset(functools.partial(train,  model, folder_train, era, fold, config_saida, lossf, optimizer, batch_size=batch, u=1), training)
             save(model.state_dict(), f"model{config_saida}_{era}")
 
 
             if (era % 2 == 0):
                 print(f"{era}\t{f}", end='', file=open(folder + config_saida, 'a'))
-                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation[:2], { "save_image" : 2} )
+                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era), validation, { "save_image" : 2} )
                 print(f'\t{val}', file=open(folder + config_saida, 'a'))
                 print(f'\t{val}')
                 wandb.log({"MSE": val})
