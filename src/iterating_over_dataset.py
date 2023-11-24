@@ -104,7 +104,7 @@ def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callab
             yt = yt.cuda()
         err = lossf(yt, y)
 
-        acc_MSE_by_view += block_MSE_by_view(yt, y, MI_size=9)
+        acc_MSE_by_view += block_MSE_by_view(yt, y, MI_size=9)*inpt.shape[0]
 
         err.backward()
         k += 1
@@ -114,7 +114,7 @@ def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callab
             optimizer.zero_grad()
             k = 0
         err = err.cpu().item()
-        acc += err
+        acc += err*inpt.shape[0]
         #Batch MSE
         wandb.log({f"Batch_MSE_era_{era}_fold{fold}": err})
     # Se "sobrou" batch
@@ -122,9 +122,9 @@ def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callab
         optimizer.step()
         optimizer.zero_grad()
 
-    wandb.log({f"MSE_{lf[0]}_{lf[1]}_fold{fold}": acc/i})
     MSE_lf = acc / i
     MSE_by_view = acc_MSE_by_view / i
+    wandb.log({f"MSE_{lf[0]}_{lf[1]}_fold{fold}": MSE_lf})
 
 
 
@@ -176,7 +176,7 @@ def reconstruct(model, folder, era, fold, original, decoded, lf, bpp, save_image
         yt = yt.cuda() if torch.cuda.is_available() else yt
         err = lossf(yt, blocks).item()
         reconstruc.add_blocks(blocks.cpu().detach().numpy())
-        acc += err
+        acc += err*y.shape[0]
         i += y.shape[0]
         # reconstruc.add_blocks(yt[:,:,:,:,32:,32:].cpu().detach().numpy())
         # print(yt.shape[0])
