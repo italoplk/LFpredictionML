@@ -206,16 +206,18 @@ class pairwise_lister:
         return data
 
 class self_pairer:
-    def __init__(self, originals : str, read_from_LF : Callable[[str], torch.Tensor] = read_LF):
+    def __init__(self, originals : str, read_from_LF : Callable[[str], torch.Tensor] = read_LF, params : dict[str, int] = dict()):
         self.originals = originals
         self.original_paths = tuple(iglob(f"{originals}/*/*.png"))
         self.read_from_LF = read_from_LF
         keys = (path.split('/')[-2:] for path in self.original_paths)
         self.lf_by_class_and_name = { (key[0], key[1].split('.')[0]) : path for key, path in zip(keys, self.original_paths) }
+        self.s = params.get('views_h', 13)
+        self.t = params.get('views_w', 13)
         #print(list(self.lf_by_class_and_name.keys()))
     def read_pair(self, lfclass, lf) -> tuple[torch.Tensor, tuple[str, torch.Tensor]]:
         path = self.lf_by_class_and_name[(lfclass, lf)]
-        data = self.read_from_LF(path)
+        data = self.read_from_LF(path, s=self.s, t=self.t)
         return (data, ('no bpp', data)) # tensor is not copied
 
 
@@ -234,10 +236,10 @@ class fold_dataset:
 
 load_dotenv("_dl4_LL.env")
 
-ORIGINAL_LFS_PATH = os.environ["ORIGINAL_LFS_MV_RGB_9views"]
+ORIGINAL_LFS_PATH_9views = os.environ["ORIGINAL_LFS_MV_RGB_9views"]
 #DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]
 
-training_dataset = self_pairer(ORIGINAL_LFS_PATH, read_from_LF=read_LF_lenslet)
+training_dataset = self_pairer(ORIGINAL_LFS_PATH_9views, read_from_LF=read_LF, params = {'views_w': 9, 'views_h' : 9})
 #training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
 # test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=False)
 # test_dataset = self_pairer(ORIGINAL_LFS_PATH)
