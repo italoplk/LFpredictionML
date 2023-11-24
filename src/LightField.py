@@ -12,30 +12,26 @@ class LightField:
 
     def __int__(self, path: str, name, lf_path, lf_name):
         self.name = lf_name
-        self.read_LF(lf_path)
+        self.lf_path = lf_path
+        self.lf_name = lf_name
 
     @classmethod
-    #Em teoria, color 3 é RGB e 1 é Gscale vulgo luma
-    def normalize_image(cls, image, bit: int, color: int):
+    def normalize_image(cls, image, bit_depth: int):
 
-        if color == 3:
-            return image.astype(np.float32) * 255
-        elif bit == 16 and color == 1:
-            return image.astype(np.float32) * cls.normalizer_factor_16bit
-        elif bit == 8 and color == 1:
-            return image.astype(np.float32) * cls.normalizer_factor_8bit
+        if bit_depth == 16:
+            return image.astype(np.float32) * cls.normalizer_factor_16bit-1
+        elif bit_depth == 8:
+            return image.astype(np.float32) * cls.normalizer_factor_8bit-1
         else:
             print("Image type not supported, implementation necessary.")
             exit(255)
 
     @classmethod
-    def denormalize_image(cls, image, bit: int, color: int):
-        if color == 1:
-            return image.astype(np.float32) / 255
-        elif bit == 8 and color == 1:
-            return ((image + 1) / cls.normalizer_factor_8bit).astype(np.uint8)
-        elif bit == 16 and color == 1:
-            return ((image + 1) / cls.normalizer_factor_16bit).astype(np.uint16)
+    def denormalize_image(cls, image, bit: int, is_prelu: bool):
+        if bit == 8:
+            return ((image + is_prelu) / cls.normalizer_factor_8bit).astype(np.uint8)
+        elif bit == 16:
+            return ((image + is_prelu) / cls.normalizer_factor_16bit).astype(np.uint16)
 
 
     # write the LFs after validation.
@@ -52,17 +48,18 @@ class LightField:
         except RuntimeError as e:
             print("Failed to save LF: ", e.__traceback__)
 
-    def read_LF(self, path):
+    def load_lf(self):
         try:
-            img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+            img = cv2.imread(self.lf_path, cv2.IMREAD_UNCHANGED)
         except RuntimeError as e:
             print("Failed to open image path: ", e.__traceback__)
             exit()
 
         # color conversion excludes other color channels
+        #@TODO supor que vai entrar em luma
         img_luma = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
         #return the normalized image
-        return self.normalize_image(img_luma, img_luma.itemsize * 8, img_luma.shape[-1])
+        return self.normalize_image(img_luma, img_luma.itemsize * 8)
 
         # @TODO assumir que todo LF vai entrar previamente arranjado de acordo com o modelo
         # try:

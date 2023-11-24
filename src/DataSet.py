@@ -18,6 +18,5 @@ class DataSet:
     def load_paths(self):
         for lf_class in os.listdir(self.path):
             path_class = os.path.join(self.path, lf_class)
-            for lf in os.listdir(path_class):
-
-                self.list_paths.append(LightField(path_class, params))
+            for lf_name in os.listdir(path_class):
+                self.list_paths.append(LightField(path_class, path_class, lf_name))
