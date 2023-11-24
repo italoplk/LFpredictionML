@@ -1,3 +1,3 @@
 class Params:
-    def __init__(self):
-        self.word = "word"
+    def __init__(self, path):
+        self.word = path

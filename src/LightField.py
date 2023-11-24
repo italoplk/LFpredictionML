@@ -2,18 +2,25 @@ import Params
 import numpy as np
 import cv2
 from einops import rearrange
-from PIL import Image
+import os
 
 
 class LightField:
 
+    def __init__(self, lf_path, lf_name):
+        self.lf_name = lf_name
+        self.lf_path = lf_path
+        self.lf_class = lf_path.split("/")[-1]
+
+        self.full_path = os.path.join(lf_path, lf_name)
+
+        print(self.full_path)
+    def __str__(self):
+        return ', '.join([self.lf_name, self.lf_path, self.full_path])
+
+
     normalizer_factor_16bit = 2 / ((2 ** 16) - 1)
     normalizer_factor_8bit = 2 / ((2 ** 8) - 1)
-
-    def __int__(self, path: str, name, lf_path, lf_name):
-        self.name = lf_name
-        self.lf_path = lf_path
-        self.lf_name = lf_name
 
     @classmethod
     def normalize_image(cls, image, bit_depth: int):

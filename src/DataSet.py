@@ -1,5 +1,5 @@
-import Params
-import LightField
+from Params import Params
+from LightField import LightField
 
 import os
 
@@ -19,4 +19,10 @@ class DataSet:
         for lf_class in os.listdir(self.path):
             path_class = os.path.join(self.path, lf_class)
             for lf_name in os.listdir(path_class):
-                self.list_paths.append(LightField(path_class, path_class, lf_name))
+                lf_temp = LightField(path_class, lf_name)
+                self.list_paths.append(lf_temp)
+                print(lf_temp.__str__())
+
+
+params = Params("/home/idm/Downloads/EPFLOriginal/")
+DataSet(params)
