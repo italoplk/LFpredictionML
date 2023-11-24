@@ -57,11 +57,17 @@ def loop_in_lf(action, lf, dataloader, **marks):
     # print(f"{lf}\t{acc}")
     return acc, i
 
+def MSE_from_diff_views(diff):
+    return torch.einsum('bcuvst,bcuvst->uv', diff, diff) / (diff.shape[0] * diff.shape[-1] * diff.shape[-2])
 
-def block_MSE_by_view(yt, yc, MI_size=13):
+def block_MSE_by_view_4d(yt, yc):
+    diff = yt - yc
+    return MSE_from_diff_views(diff)
+
+def block_MSE_by_view_lenslet(yt, yc, MI_size=13):
     diff = yt - yc
     diff = rearrange(diff, 'b c (u s) (v t) -> b c s t u v', s = MI_size,  t = MI_size)
-    return torch.einsum('bcuvst,bcuvst->uv', diff, diff) / (diff.shape[-1] * diff.shape[-2])
+    return MSE_from_diff_views(diff)
 
 
 
@@ -104,7 +110,7 @@ def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callab
             yt = yt.cuda()
         err = lossf(yt, y)
 
-        acc_MSE_by_view += block_MSE_by_view(yt, y, MI_size=9)*inpt.shape[0]
+        acc_MSE_by_view += block_MSE_by_view_lenslet(yt, y, MI_size=9)*inpt.shape[0]
 
         err.backward()
         k += 1
