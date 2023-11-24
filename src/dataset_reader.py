@@ -89,7 +89,7 @@ def normalize_16bit_image_rgb(image):
 #     return (((image +1)/normalizer_factor).astype(np.uint16))
 
 def unnormalize_to_16bit_image(image):
-    return (((image+1)/normalizer_factor).astype(np.uint16))
+    return (((image)/normalizer_factor).astype(np.uint16))
 
 def unnormalize_to_16bit_image_rgb(image):
     return (((image)*255.0).astype(np.uint16))
@@ -125,8 +125,8 @@ class pairwise_lister:
         
         self.original_paths = tuple(filter(included, iglob(f"{originals}/*/*.png")))
         self.decoded_paths = tuple(filter(included, iglob(f"{decoded}/*/*/*.png")))
-        print('Originals', self.decoded)
-        print('Original paths', self.decoded_paths)
+        # print('Originals', self.decoded)
+        # print('Original paths', self.decoded_paths)
 
         self.original_lfs = { tuple(path.split("/")[-2:]) : path for path in self.original_paths}
         #print(self.original_paths)
@@ -258,9 +258,9 @@ class reconstructor:
         self.i = new_i
     def save_image(self, filename):
         #print(self.shape)
-        folder = '/'.join(filename.split('/')[:-1])
-        print(folder)
-        write_LF_PMG(self.values, folder)
+        # folder = '/'.join(filename.split('/')[:-1])
+
+        write_LF_PMG(self.values, filename)
 
     def compare(self, original):
         views_MSE = self.compare_MSE_by_view(original)

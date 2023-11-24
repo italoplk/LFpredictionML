@@ -69,7 +69,7 @@ print('batch: ', batches)
 
 for batch in batches:
 
-    config_saida = f"quick_imgTangenteYCBCR_2k_16l_sigmoid.txt"
+    config_saida = f"quick_imgSigmoid_2k_16l.txt"
     print(batch)
 
     wandb.init(
@@ -81,8 +81,8 @@ for batch in batches:
             "learning_rate": 0.0005,
             "architecture": f"{config_saida}",
             "dataset": "EPFL",
-            "epochs": 5,
-            "name": f"{config_saida}"
+            "epochs": epochs,
+            "BatchSize": batch,
         }
     )
 
@@ -121,7 +121,7 @@ for batch in batches:
                 # reset file if re-simulating
            #     outputMSEs.write(f"{era}\n")
 
-            f = loop_dataset(functools.partial(train,  model, folder_train, era, fold, config_saida, lossf, optimizer, batch_size=10, u=1), training[:2])
+            f = loop_dataset(functools.partial(train,  model, folder_train, era, fold, config_saida, lossf, optimizer, batch_size=batch, u=1), training[:2])
             save(model.state_dict(), f"model{config_saida}_{era}")
 
 
