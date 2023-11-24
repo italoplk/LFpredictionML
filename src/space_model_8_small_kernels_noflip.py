@@ -7,10 +7,10 @@ from unetlike import UNetLike, preserving_dimensions, Repeat
 class UNetSpace(nn.Module):
     def __init__(self, name):
         super().__init__()
-        u, v = (13,13)
-        blocker = Rearrange('b c u v (bs s) (bt t) -> b (bs bt c) u v s t', s=32,t=32)
-        flatener = Rearrange('b c u v s t -> b c (u s) (v t)', u = u, v = v)
-        deflatener = Rearrange('b c (u s) (v t) -> b c u v s t', u = u, v = v)
+        s, t = (13,13)
+        blocker = Rearrange('b c s t (bu u) (bv v) -> b (bu bv c) s t u v', u=32,v=32)
+        flatener = Rearrange('b c s t u v -> b c (s u) (t v)', s = s, t = t)
+        deflatener = Rearrange('b c (s u) (t v) -> b c s t u v', s = s, t = t)
         flat_model = UNetLike([ # 6, 416, 416
             nn.Sequential(
                 preserving_dimensions(Conv2d, 6, 10), nn.Dropout(), nn.PReLU() # 10, 416, 416

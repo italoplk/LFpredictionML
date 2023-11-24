@@ -7,9 +7,9 @@ from unetlike import UNetLike, preserving_dimensions
 class UNetSpace(nn.Module):
     def __init__(self, name):
         super().__init__()
-        u, v = (13,13)
-        self.flatener = Rearrange('b c u v s t -> b c (u s) (v t)', u = u, v = v)
-        self.deflatener = Rearrange('b c (u s) (v t) -> b c u v s t', u = u, v = v)
+        s, t = (13,13)
+        self.flatener = Rearrange('b c s t u v -> b c (s u) (t v)', s = s, t = t)
+        self.deflatener = Rearrange('b c (s u) (t v) -> b c s t u v', s = s, t = t)
         self.flat_model = UNetLike([ # 4, 832, 832
             nn.Sequential(
               Conv2d(3, 10, (20,20), stride = (5,5), padding=(4,4)), nn.Dropout(), nn.PReLU(),
