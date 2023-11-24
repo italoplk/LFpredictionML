@@ -4,8 +4,9 @@
 
 from functools import partial
 from functools import reduce as fc_reduce
+import math
 from operator import __mul__
-from typing import Callable
+from typing import Callable, Sequence
 
 from torch.utils.data import Dataset
 
@@ -20,6 +21,7 @@ from torch.utils.data import DataLoader
 from random import shuffle, sample
 import torch
 from itertools import accumulate
+import torch.nn.functional as F
 
 import cv2
 # import einops
@@ -70,6 +72,15 @@ class single:
             raise IndexError(i)
         else:
             return self.f()
+
+def pad_to_multiple(array : torch.Tensor, dims : Sequence[int]):
+    shape = array.shape
+    new_shape = tuple(math.ceil(dim/multiple)*multiple for dim, multiple in zip(shape, dims))
+    print(new_shape)
+    padding = [0]*(2*len(shape))
+    padding[1:1+len(new_shape)*2:2] = (new - old for new, old in zip(new_shape, shape))
+    print(padding)
+    return F.pad(array, padding, 'constant', 0)
 
 #TODO CHECAR O -1 DUPLO
 normalizer_factor = 2/(2 ** 16 - 1)
@@ -125,13 +136,12 @@ def read_LF(path : str, **kwargs : int) -> torch.Tensor:
     """
     dims = kwargs if len(kwargs) != 0 else { 's' : 13, 't' : 13}
     img = read_LF_PNG(path)
+    print(img.shape)
     img_ycbcr = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
     img_normalized = normalize_16bit_image(img_ycbcr)
-    try:
-        return rearrange(img_normalized, '(s u) (t v) c -> c s t u v', **dims)[:1, :, :, :, :]
-    except EinopsError:
-        print(f"failed to read {path}", file=sys.stderr)
-        return torch.zeros((3,1,1,1,1))
+    img_normalized = pad_to_multiple(img_normalized, (dims['s'], dims['t']))
+    print(img_normalized.shape)
+    return rearrange(img_normalized, '(s u) (t v) c -> c s t u v', **dims)[:1, :, :, :, :]
 
 def read_LF_lenslet(path : str) -> torch.Tensor:
     """
