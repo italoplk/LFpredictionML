@@ -125,7 +125,8 @@ class pairwise_lister:
         
         self.original_paths = tuple(filter(included, iglob(f"{originals}/*/*.png")))
         self.decoded_paths = tuple(filter(included, iglob(f"{decoded}/*/*/*.png")))
-        #print('Original', self.original_paths)
+        print('Originals', self.decoded)
+        print('Original paths', self.decoded_paths)
 
         self.original_lfs = { tuple(path.split("/")[-2:]) : path for path in self.original_paths}
         #print(self.original_paths)
@@ -174,7 +175,8 @@ class fold_dataset:
         return (index, self.lister(*index))
     def sampled(self, n):
         return (self[i] for i in sample(range(len(self)), n))
-load_dotenv()
+
+load_dotenv("_italo.env")
 
 ORIGINAL_LFS_PATH = os.environ["ORIGINAL_LFS_PATH"]
 DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]

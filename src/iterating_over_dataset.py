@@ -50,7 +50,7 @@ def block_MSE_by_view(yt, yc):
 
 
 # auterar o datareader pra sair exemplos
-def train(model, folder, era, config_saida, lossf, optimizer, original, decoded, lf, bpp, batch_size=1, u=0):
+def train(model, folder, era, fold, config_saida, lossf, optimizer, original, decoded, lf, bpp, batch_size=1, u=0):
     lf = lf
     loader = blocked_referencer(decoded, original)
     acc = 0
@@ -82,7 +82,7 @@ def train(model, folder, era, config_saida, lossf, optimizer, original, decoded,
         err.cpu()
         acc += err.item()
         #MSE DO BATCH
-        wandb.log({f"acc_{config_saida}_{era}": acc})
+        wandb.log({f"Batch_MSE_era_{era}_fold_{fold}": err})
     wandb.log({f"acc_{config_saida}_{lf}_{era}": acc})
     MSE_lf = acc / i
     MSE_by_view = acc_MSE_by_view / i
