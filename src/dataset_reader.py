@@ -74,7 +74,11 @@ class single:
 #TODO CHECAR O -1 DUPLO
 normalizer_factor = 2/(2 ** 16 - 1)
 def read_LF_PNG(path):
-    return cv2.imread(path, cv2.IMREAD_UNCHANGED)
+    img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+    if img is None:
+        # Maybe find a better exception type
+        raise OSError(f'Failed to read "{str(path)}"')
+    return img
 
 # def normalize_16bit_image(image):
 #     return torch.tensor(image.astype(np.float32)) * normalizer_factor - 1
