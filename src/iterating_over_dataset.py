@@ -180,7 +180,8 @@ def reconstruct(model, folder, era, fold, original, decoded, lf, bpp, save_image
         i += y.shape[0]
         # reconstruc.add_blocks(yt[:,:,:,:,32:,32:].cpu().detach().numpy())
         # print(yt.shape[0])
-        wandb.log({f"Batch_MSE_era_{era}_fold{fold}": acc/i})
+        wandb.log({f"Batch_MSE_era_{era}_fold{fold}": err})
+        wandb.log({f"Batch_MSE_{lf[0]}_{lf[1]}_fold{fold}": err})
     wandb.log({f"MSE_{lf[0]}_{lf[1]}_fold{fold}": acc / i})
     # print(acc)
     # fprint(reconstruc.i, reconstruc.cap)
