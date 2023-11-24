@@ -136,11 +136,9 @@ def read_LF(path : str, **kwargs : int) -> torch.Tensor:
     """
     dims = kwargs if len(kwargs) != 0 else { 's' : 13, 't' : 13}
     img = read_LF_PNG(path)
-    print(img.shape)
     img_ycbcr = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
     img_normalized = normalize_16bit_image(img_ycbcr)
     img_normalized = pad_to_multiple(img_normalized, (dims['s'], dims['t']))
-    print(img_normalized.shape)
     return rearrange(img_normalized, '(s u) (t v) c -> c s t u v', **dims)[:1, :, :, :, :]
 
 def read_LF_lenslet(path : str) -> torch.Tensor:
