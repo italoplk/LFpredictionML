@@ -78,10 +78,8 @@ class single:
 def pad_to_multiple(array : torch.Tensor, dims : Sequence[int]):
     shape = array.shape
     new_shape = tuple(math.ceil(dim/multiple)*multiple for dim, multiple in zip(shape, dims))
-    print(new_shape)
     padding = [0]*(2*len(shape))
     padding[1:1+len(new_shape)*2:2] = (new - old for new, old in zip(new_shape, shape))
-    print(padding)
     return F.pad(array, padding, 'constant', 0)
 
 #TODO CHECAR O -1 DUPLO
