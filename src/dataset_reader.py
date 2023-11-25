@@ -30,6 +30,7 @@ from einops import EinopsError
 import os
 import sys
 from dotenv import load_dotenv
+from abc import ABC,abstractclassmethod
 
 class chain:
     def __init__(self, *components):
@@ -153,9 +154,15 @@ def read_LF_lenslet(path : str) -> torch.Tensor:
     return img_color_in_front
 
 on_the_list = lambda candidate, l: any(test in candidate for test in l)
+
+class LF_pair_lister(ABC):
+    @abstractclassmethod
+    def read_pair(self, lfclass : str, lf : str) -> Sequence[torch.Tensor, tuple[str, torch.Tensor]]:
+        raise NotImplemented()
+
 #modificar pairwise para retornar uma lista de blocos
-class pairwise_lister:
-    def __init__(self, originals, decoded, exin_clude, exclude = True):
+class pairwise_lister(LF_pair_lister):
+    def __init__(self, originals, decoded, exin_clude, exclude = True, read_from_LF : Callable[[str], torch.Tensor] = read_LF, params : dict = dict()):
         self.decoded = decoded
         self.originals = originals
         if exclude:
@@ -163,6 +170,7 @@ class pairwise_lister:
         else:
             included = lambda candidate: on_the_list(candidate, exin_clude)
         
+        self.read_from_LF = read_from_LF
         self.original_paths = tuple(filter(included, iglob(f"{originals}/*/*.png")))
         self.decoded_paths = tuple(filter(included, iglob(f"{decoded}/*/*/*.png")))
         #print('Original', self.original_paths)
@@ -176,18 +184,19 @@ class pairwise_lister:
             key : (self.original_lfs[(key[0], key[1] + '.mat.png')], dec_path) for key, dec_path in self.decoded_lfs.items()}
         self.lfs = list(set(map(lambda key: key[:2], self.pairs.keys())))
         self.bbps = { lf : [bpp for lfclass, lfname, bpp in self.decoded_lfs.keys() if (lfclass, lfname) == lf] for lf in self.lfs }
-    
+        self.s = params['views_h']
+        self.t = params['views_w']
 
     def read_original_mat(self, lfclass, lf):
         #path = '/'.join((self.originals, lfclass, lf.replace("___", "_&_") + '.mat.png'))
         path = '/'.join((self.originals, lfclass, lf + '.mat.png'))
-        return read_LF(path)
+        return self.read_from_LF(path, s=self.s, t=self.t)
         #with h5py.File(path, 'r') as f:
         #    return np.array(f['dataset'])
     
     def read_decoded_mat(self, lfclass, lf, bpp):
         path = '/'.join((self.decoded, lfclass, lf, bpp))
-        return (bpp, read_LF(path))
+        return (bpp, self.read_from_LF(path, s=self.s, t=self.t))
     
     def read_pair(self, lfclass, lf):
         try:
@@ -200,8 +209,7 @@ class pairwise_lister:
         original = single(self.read_original_mat, (lfclass, lf))
         #print(len(original))
         decoded = partial(self.read_decoded_mat, lfclass, lf)
-        data = chain(original, mymap(decoded, bpps))
-        return data
+        return (original, ((bpp, decoded(bpp)) for bpp in bpps))
 
 class self_pairer:
     def __init__(self, originals : str, read_from_LF : Callable[[str], torch.Tensor] = read_LF, params : dict[str, int] = dict()):
@@ -213,10 +221,10 @@ class self_pairer:
         self.s = params.get('views_h', 13)
         self.t = params.get('views_w', 13)
         #print(list(self.lf_by_class_and_name.keys()))
-    def read_pair(self, lfclass, lf) -> tuple[torch.Tensor, tuple[str, torch.Tensor]]:
+    def read_pair(self, lfclass, lf) -> tuple[torch.Tensor, Sequence[tuple[str, torch.Tensor]]]:
         path = self.lf_by_class_and_name[(lfclass, lf)]
         data = self.read_from_LF(path, s=self.s, t=self.t)
-        return (data, ('no bpp', data)) # tensor is not copied
+        return (data, [('no bpp', data)]) # tensor is not copied
 
 
 
