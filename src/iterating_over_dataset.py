@@ -7,7 +7,7 @@ import torch.nn.utils as utils
 from torch.optim import Optimizer
 import random
 import json
-from dataset_reader import reconstructor_lenslet, training_dataset, fold_dataset, lenslet_blocked_referencer
+from dataset_reader import reconstructor, fold_dataset, blocked_referencer
 from torch.utils.data import DataLoader, RandomSampler
 import numpy as np
 import wandb
@@ -18,7 +18,7 @@ lfloader = functools.partial(DataLoader, batch_size=1, num_workers=1, persistent
 make_dataloader = functools.partial(DataLoader, batch_size=5, num_workers=2, prefetch_factor=1, persistent_workers=True)
 
 
-def loop_dataset(action, lfs, mark: Dict[str, int] = dict(), dataset=training_dataset):
+def loop_dataset(action, lfs, dataset, mark: Dict[str, int] = dict()):
     """
         action: função a ser chamada(treinamento ou validação ou teste)... com o LF original, o decodificado, o nome LF, o BPP...
             ... e possivelmente "marcas"(flags True/False determinadas pela entrada mark)
@@ -31,15 +31,15 @@ def loop_dataset(action, lfs, mark: Dict[str, int] = dict(), dataset=training_da
     i = 0
     # print(len(lfs))
     lfs = fold_dataset(dataset.read_pair, lfs)
-    for i, (lf, lfdata) in enumerate(lfs, start=1):
-        loader = iter(lfloader(lfdata))
-        r = loop_in_lf(action, lf, loader, **{key: i < value for key, value in mark.items()})
+    for i, (lf, (original, decoded)) in enumerate(lfs, start=1):
+        loader = lfloader(decoded)
+        r = loop_in_lf(action, lf, original, loader, **{key: i < value for key, value in mark.items()})
         acc += r[0]
         i += r[1]
     return acc / i
 
 
-def loop_in_lf(action, lf, dataloader, **marks):
+def loop_in_lf(action, lf, original, dataloader, **marks):
     """
         action: função(treinamento) a ser chamada...pelo LF origina, o decodificado, o nome LF, o BPP...
             ... e possivelmente "marcas"(flags True/False determinadas pela marks) como argumentos por nome
@@ -47,7 +47,6 @@ def loop_in_lf(action, lf, dataloader, **marks):
         dataloader: sequência de LFs definida pelo dataset.read_pair
         **marks: flags a serem passadas em action
     """
-    original = next(dataloader)# O primeiro LF da sequência é sempre o original
     acc = 0
     i = 0
     for bpp, decoded in dataloader:
@@ -91,7 +90,7 @@ def block_MSE_by_view_lenslet(yt, yc, MI_size=13):
 def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callable[[torch.Tensor,torch.Tensor], torch.Tensor],
            optimizer : Optimizer, original : np.ndarray, decoded : np.ndarray, lf : str, bpp : str, batch_size : int = 1, u : int=1):
     lf = lf
-    loader = lenslet_blocked_referencer(decoded, original, MI_size=9)
+    loader = blocked_referencer(decoded, original)
     acc = 0
     model.train()
     i = 0
@@ -104,13 +103,14 @@ def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callab
         # print(yt.shape)
         if torch.cuda.is_available():
             inpt = inpt.cuda()
+        print(inpt.shape)
         y = model(inpt)
-        yt = yt[:, :,  9*32:, 9*32:]
+        yt = yt[:, :, :, :, 32:, 32:]
         if torch.cuda.is_available():
             yt = yt.cuda()
         err = lossf(yt, y)
 
-        acc_MSE_by_view += block_MSE_by_view_lenslet(yt, y, MI_size=9)*inpt.shape[0]
+        acc_MSE_by_view += block_MSE_by_view_lenslet(yt, y)*inpt.shape[0]
 
         err.backward()
         k += 1
@@ -150,7 +150,7 @@ lossf = nn.MSELoss()
 
 def test(model, original, decoded, *lf):
     lf = lf
-    loader = lenslet_blocked_referencer(decoded, original)
+    loader = blocked_referencer(decoded, original)
     acc = 0
     model.eval()
     i = 0
@@ -167,12 +167,12 @@ def test(model, original, decoded, *lf):
 
 
 def reconstruct(model, folder, era, fold, original, decoded, lf, bpp, save_image):
-    loader = lenslet_blocked_referencer(decoded, original,MI_size=9)
+    loader = blocked_referencer(decoded, original,MI_size=9)
     i = 0
     acc = 0
     # model.cuda()
     model.eval()
-    reconstruc = reconstructor_lenslet(original.shape, 32, 9)
+    reconstruc = reconstructor(original.shape, 32, 9)
     for inpt, yt in DataLoader(loader, batch_size=10, num_workers=2, prefetch_factor=5, persistent_workers=True):
         y = model(inpt.cuda() if torch.cuda.is_available() else inpt)
         # y = model(inpt)
