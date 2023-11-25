@@ -111,8 +111,9 @@ def unnormalize_to_16bit_image_rgb(image):
     return (((image)*255.0).astype(np.uint16))
 
 #write the LFs after validation
-def write_LF_PMG(image, path):
-    image = rearrange(image, 'c s t u v -> (s u) (t v) c', s=13, t=13)
+def write_LF_PMG(image, path, **kwargs : int):
+    dims = kwargs if len(kwargs) != 0 else { 's' : 13, 't' : 13}
+    image = rearrange(image, 'c s t u v -> (s u) (t v) c', **dims)
     image = unnormalize_to_16bit_image(image)
     #image = cv2.cvtColor(image, cv2.COLOR_YCrCb2BGR)
     #print(image.shape)
