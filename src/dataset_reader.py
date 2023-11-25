@@ -261,11 +261,8 @@ class fold_dataset:
 class blocked_referencer(Dataset):
     def __init__(self, decoded, original):
         super().__init__()
+        self.original = original[:1, :, :, :, :]
         self.decoded = decoded[0, :1, :, :, :, :]
-        try:
-            self.original = original[0, :1, :, :, :, :]
-        except IndexError:
-            self.original = original[:1, :, :, :, :]
         self.N = 32
         self.inner_shape = decoded.shape
         if(self.decoded.shape == self.original.shape):
@@ -298,10 +295,7 @@ class lenslet_blocked_referencer(Dataset):
     def __init__(self, decoded, original, MI_size=13):
         super().__init__()
         self.decoded = decoded[0, :1, :, :]
-        try:
-            self.original = original[0, :1, :, :]
-        except IndexError:
-            self.original = original[:1, :, :, :, :]
+        self.original = original[:1, :, :, :, :]
         self.N = 32 * MI_size
         self.inner_shape = decoded.shape
         if(self.decoded.shape == self.original.shape):
@@ -331,10 +325,11 @@ class lenslet_blocked_referencer(Dataset):
         return neighborhood, expected_block
 
 class reconstructor:
-    def __init__(self, shape, N):
-        self.N = N
-        self.block_shape = tuple(dim // self.N - 1 for dim in shape[-2:])
-        self.shape = shape[-5:-2] + tuple(dim * self.N for dim in self.block_shape)
+    def __init__(self, shape, params):
+        (self.s, self.t) = (params['views_h'], params['views_w'])
+        self.Ns = (params["divider_block_h"], params["divider_block_w"])
+        self.block_shape = tuple(dim // dim_div - 1 for dim, dim_div in zip(shape[-2:],self.Ns))
+        self.shape = shape[-5:-2] + tuple(dim * dim_div for dim, dim_div in zip(self.block_shape[-2:],self.Ns))
         self.values = np.zeros(self.shape, dtype=np.float32)
         self.i = 0
         self.cap = np.prod(self.block_shape)
@@ -347,17 +342,17 @@ class reconstructor:
         assert(new_i <= self.cap)
         #print(tuple(blocks.shape[1:]))
         #print((*self.shape[:-2], self.N, self.N))
-        assert(tuple(blocks.shape[1:]) == (*self.shape[:-2], self.N, self.N))
+        assert(tuple(blocks.shape[1:]) == (*self.shape[:-2], *self.Ns))
         #blocks = blocks.astype(np.int16)
         for i in range(blocks.shape[0]):
             x,y = self.calculate_coordinate(i)
             #print(blocks[i, :, :, :, :].shape)
             #print(self.values[:, :, :, x*self.N:(x+1)*self.N, y*self.N:(y+1)*self.N].shape)
-            self.values[:, :, :, x*self.N:(x+1)*self.N, y*self.N:(y+1)*self.N] = blocks[i, :, :, :, :]
+            self.values[:, :, :, x*self.Ns[0]:(x+1)*self.Ns[0], y*self.Ns[1]:(y+1)*self.Ns[1]] = blocks[i, :, :, :, :]
         self.i = new_i
     def save_image(self, filename):
         #print(self.shape)
-        write_LF_PMG(self.values, filename)
+        write_LF_PMG(self.values, filename, s=self.s, t=self.t)
 
     def compare(self, original):
         views_MSE = self.compare_MSE_by_view(original)
@@ -371,7 +366,7 @@ class reconstructor:
     def compare_MSE_by_view(self, original):
         if original.shape[0] not in (1, 3):
             raise ValueError("Expected LF to have either 1 or 3 color channels, found {original.shape[0]}")
-        reference = original[0, :, :, :, self.N:self.N + self.shape[-2], self.N:self.N + self.shape[-1]]
+        reference = original[:, :, :, self.Ns[0]:self.Ns[0] + self.shape[-2], self.Ns[1]:self.Ns[1] + self.shape[-1]]
         # print(reference.shape)
         diff = self.values -  reference.numpy()
         squared = np.einsum('...,...->...', diff, diff)
@@ -379,11 +374,11 @@ class reconstructor:
         return views_MSE
 
 class reconstructor_lenslet:
-    def __init__(self, shape, N, MI_SIZE=13):
-        self.MI_SIZE = MI_SIZE
-        self.N = N * MI_SIZE
-        self.block_shape = tuple(dim // self.N - 1 for dim in shape[-2:])
-        self.shape = (shape[-3], *(dim * self.N for dim in self.block_shape))
+    def __init__(self, shape, params):
+        self.MI_SIZE = (params['views_h'], params['views_w'])
+        self.Ns = (params["divider_block_h"] * params['views_h'], params["divider_block_w"] * params['views_w'])
+        self.block_shape = tuple(dim // dim_div - 1 for dim, dim_div in zip(shape[-2:],self.Ns))
+        self.shape = (shape[-3], *(dim * dim_div for dim, dim_div in zip(shape[-2:],self.Ns)))
         self.values = np.zeros(self.shape, dtype=np.float32)
         self.i = 0
         self.cap = np.prod(self.block_shape)
@@ -394,13 +389,13 @@ class reconstructor_lenslet:
     def add_blocks(self, blocks):
         new_i = blocks.shape[0] + self.i
         assert(new_i <= self.cap)
-        assert(tuple(blocks.shape[1:]) == (*self.shape[:-2], self.N, self.N))
+        assert(tuple(blocks.shape[1:]) == (*self.shape[:-2], *self.Ns))
         #blocks = blocks.astype(np.int16)
         for i in range(blocks.shape[0]):
             x,y = self.calculate_coordinate(i)
             #print(blocks[i, :, :, :, :].shape)
             #print(self.values[:, :, :, x*self.N:(x+1)*self.N, y*self.N:(y+1)*self.N].shape)
-            self.values[:, x*self.N:(x+1)*self.N, y*self.N:(y+1)*self.N] = blocks[i, :, :]
+            self.values[:, x*self.Ns[0]:(x+1)*self.Ns[0], y*self.Ns[1]:(y+1)*self.Ns[1]] = blocks[i, :, :]
         self.i = new_i
     def save_image(self, filename):
         #print(self.shape)
@@ -417,7 +412,7 @@ class reconstructor_lenslet:
     def compare_MSE_by_view(self, original):
         if original.shape[0] not in (1, 3):
             raise ValueError("Expected LF to have either 1 or 3 color channels, found {original.shape[0]}")
-        reference = original[0, :, self.N:self.N + self.shape[-2], self.N:self.N + self.shape[-1]]
+        reference = original[0, :, self.Ns[0]:self.Ns[0] + self.shape[-2], self.Ns[1]:self.Ns[1] + self.shape[-1]]
         # print(reference.shape)
         diff = self.values -  reference.numpy()
         squared = np.einsum('...,...->...', diff, diff)

@@ -88,7 +88,7 @@ def block_MSE_by_view_lenslet(yt, yc, MI_size=13):
         u: quantas vezes iterar antes de atualizar os pesos, multiplica o tamanho do batch ao custo de tempo ao invés de memória
     """
 def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callable[[torch.Tensor,torch.Tensor], torch.Tensor],
-           optimizer : Optimizer, original : np.ndarray, decoded : np.ndarray, lf : str, bpp : str, batch_size : int = 1, u : int=1):
+           optimizer : Optimizer, params : dict, original : np.ndarray, decoded : np.ndarray, lf : str, bpp : str, batch_size : int = 1, u : int=1):
     lf = lf
     loader = blocked_referencer(decoded, original)
     acc = 0
@@ -103,14 +103,13 @@ def train(model : nn.Module, folder : str, era : int, fold : str, lossf : Callab
         # print(yt.shape)
         if torch.cuda.is_available():
             inpt = inpt.cuda()
-        print(inpt.shape)
         y = model(inpt)
         yt = yt[:, :, :, :, 32:, 32:]
         if torch.cuda.is_available():
             yt = yt.cuda()
         err = lossf(yt, y)
 
-        acc_MSE_by_view += block_MSE_by_view_lenslet(yt, y)*inpt.shape[0]
+        acc_MSE_by_view += block_MSE_by_view_4d(yt, y)*inpt.shape[0]
 
         err.backward()
         k += 1
@@ -166,19 +165,19 @@ def test(model, original, decoded, *lf):
     return (acc, i)
 
 
-def reconstruct(model, folder, era, fold, original, decoded, lf, bpp, save_image):
-    loader = blocked_referencer(decoded, original,MI_size=9)
+def reconstruct(model, folder, era, fold, params, original, decoded, lf, bpp, save_image):
+    loader = blocked_referencer(decoded, original)
     i = 0
     acc = 0
     # model.cuda()
     model.eval()
-    reconstruc = reconstructor(original.shape, 32, 9)
+    reconstruc = reconstructor(original.shape, params)
     for inpt, yt in DataLoader(loader, batch_size=10, num_workers=2, prefetch_factor=5, persistent_workers=True):
         y = model(inpt.cuda() if torch.cuda.is_available() else inpt)
         # y = model(inpt)
         blocks = y
         # err = lossf(yt[:,:,:,:,32:,32:].cuda(), blocks).item()
-        yt = yt[:, :, 9*32:, 9*32:]
+        yt = yt[:, :, :, :, 32:, 32:]
         yt = yt.cuda() if torch.cuda.is_available() else yt
         err = lossf(yt, blocks).item()
         reconstruc.add_blocks(blocks.cpu().detach().numpy())

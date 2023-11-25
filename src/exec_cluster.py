@@ -135,13 +135,13 @@ for batch in batches:
                 # reset file if re-simulating
            #     outputMSEs.write(f"{era}\n")
 
-            f = loop_dataset(functools.partial(train,  model, folder_train, era, fold, lossf, optimizer, batch_size=batch, u=1), training, dataset)
+            f = loop_dataset(functools.partial(train,  model, folder_train, era, fold, lossf, optimizer, params, batch_size=batch, u=1), training, dataset)
             save(model.state_dict(), f"model{config_saida}_{era}")
 
 
             if (era % 2 == 0):
                 print(f"{era}\t{f}", end='', file=open(folder + config_saida, 'a'))
-                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era, fold), validation, dataset, { "save_image" : 2})
+                val = loop_dataset(functools.partial(reconstruct, model, folder_validation, era, fold, params), validation, dataset, { "save_image" : 2})
                 print(f'\t{val}', file=open(folder + config_saida, 'a'))
                 print(f'\t{val}')
                 wandb.log({"MSE": val})
