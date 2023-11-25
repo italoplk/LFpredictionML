@@ -6,7 +6,7 @@ from functools import partial
 from functools import reduce as fc_reduce
 import math
 from operator import __mul__
-from typing import Callable, Sequence
+from typing import Callable, Sequence, Tuple
 import typing
 
 from torch.utils.data import Dataset
@@ -157,7 +157,7 @@ on_the_list = lambda candidate, l: any(test in candidate for test in l)
 
 class LF_pair_lister(ABC):
     @abstractclassmethod
-    def read_pair(self, lfclass : str, lf : str) -> tuple[torch.Tensor, Sequence[tuple[str, torch.Tensor]]]:
+    def read_pair(self, lfclass : str, lf : str) -> Tuple[torch.Tensor, Sequence[Tuple[str, torch.Tensor]]]:
         raise NotImplemented()
 
 #modificar pairwise para retornar uma lista de blocos
@@ -221,7 +221,7 @@ class self_pairer:
         self.s = params.get('views_h', 13)
         self.t = params.get('views_w', 13)
         #print(list(self.lf_by_class_and_name.keys()))
-    def read_pair(self, lfclass, lf) -> tuple[torch.Tensor, Sequence[tuple[str, torch.Tensor]]]:
+    def read_pair(self, lfclass, lf) -> Tuple[torch.Tensor, Sequence[Tuple[str, torch.Tensor]]]:
         path = self.lf_by_class_and_name[(lfclass, lf)]
         data = self.read_from_LF(path, s=self.s, t=self.t)
         return (data, [('no bpp', data)]) # tensor is not copied
