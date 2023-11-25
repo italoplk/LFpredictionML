@@ -212,7 +212,7 @@ class pairwise_lister(LF_pair_lister):
         return (original, ((bpp, decoded(bpp)) for bpp in bpps))
 
 class self_pairer:
-    def __init__(self, originals : str, read_from_LF : Callable[[str], torch.Tensor] = read_LF, params : dict[str, int] = dict()):
+    def __init__(self, originals : str, read_from_LF : Callable[[str], torch.Tensor] = read_LF, params : dict = dict()):
         self.originals = originals
         self.original_paths = tuple(iglob(f"{originals}/*/*.png"))
         self.read_from_LF = read_from_LF
@@ -431,7 +431,7 @@ read_lf_modes = {
 K = typing.TypeVar('K')
 V = typing.TypeVar('V')
 
-def from_modes(modes : dict[K, V], key : K, error_message : str = 'Unknown key "{key}", expected any of "{allkeys}"') -> V:
+def from_modes(modes : dict, key : K, error_message : str = 'Unknown key "{key}", expected any of "{allkeys}"') -> V:
     try:
         return modes[key]
     except KeyError:
