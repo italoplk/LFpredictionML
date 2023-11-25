@@ -263,10 +263,13 @@ class blocked_referencer(Dataset):
     def __init__(self, decoded, original):
         super().__init__()
         self.decoded = decoded[0, :1, :, :, :, :]
-        self.original = original[0, :1, :, :, :, :]
+        try:
+            self.original = original[0, :1, :, :, :, :]
+        except IndexError:
+            self.original = original[:1, :, :, :, :]
         self.N = 32
         self.inner_shape = decoded.shape
-        if(decoded.shape == original.shape):
+        if(self.decoded.shape == self.original.shape):
             self.shape = tuple(dim // self.N - 1 for dim in self.inner_shape[-2:])
             assert(all(dim != 0 for dim in self.shape))
         else:
@@ -296,10 +299,13 @@ class lenslet_blocked_referencer(Dataset):
     def __init__(self, decoded, original, MI_size=13):
         super().__init__()
         self.decoded = decoded[0, :1, :, :]
-        self.original = original[0, :1, :, :]
+        try:
+            self.original = original[0, :1, :, :]
+        except IndexError:
+            self.original = original[:1, :, :, :, :]
         self.N = 32 * MI_size
         self.inner_shape = decoded.shape
-        if(decoded.shape == original.shape):
+        if(self.decoded.shape == self.original.shape):
             self.shape = tuple(dim // self.N - 1 for dim in self.inner_shape[-2:])
             assert(all(dim != 0 for dim in self.shape))
         else:
