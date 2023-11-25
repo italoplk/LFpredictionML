@@ -63,14 +63,14 @@ batches = (10,)
 lr = 1e-5
 print('batch: ', batches)
 
-load_dotenv(".env")
+load_dotenv("_dl4_MV13.env")
 params = {
     'views_w': 9,
     'views_h' : 9,
     'divider_block_h' : 32,
     'divider_block_w' : 32,
     'LF_mode' : '4d', # Opposed to lenslet
-    'dataset_root_path' : [os.environ["ORIGINAL_LFS_MV_RGB_9views"]], # Might have more than 1(the decoded)
+    'dataset_root_path' : [os.environ["ORIGINAL_LFS_MV_RGB_9V"]], # Might have more than 1(the decoded)
     'dataset_mode' : 'self_pairer', # Opposed to the pairwise_lister one
 }
 

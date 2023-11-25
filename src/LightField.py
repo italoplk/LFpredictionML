@@ -14,7 +14,6 @@ class LightField:
 
         self.full_path = os.path.join(lf_path, lf_name)
 
-        print(self.full_path)
     def __str__(self):
         return ', '.join([self.lf_name, self.lf_path, self.full_path])
 
@@ -55,6 +54,8 @@ class LightField:
         except RuntimeError as e:
             print("Failed to save LF: ", e.__traceback__)
 
+
+    # @TODO assumir que todo LF vai entrar previamente arranjado de acordo com o modelo
     def load_lf(self):
         try:
             img = cv2.imread(self.lf_path, cv2.IMREAD_UNCHANGED)
@@ -68,9 +69,4 @@ class LightField:
         #return the normalized image
         return self.normalize_image(img_luma, img_luma.itemsize * 8)
 
-        # @TODO assumir que todo LF vai entrar previamente arranjado de acordo com o modelo
-        # try:
-        #     return rearrange(normalized_image, '(s u) (t v) c -> c s t u v', s=13, t=13)[:1, :, :, :, :]
-        # except EinopsError:
-        #     print(f"failed to read {path}", file=sys.stderr)
-        #     return np.zeros((3,1,1,1,1))
+

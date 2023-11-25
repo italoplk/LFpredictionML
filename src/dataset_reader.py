@@ -240,7 +240,7 @@ class fold_dataset:
     def sampled(self, n):
         return (self[i] for i in sample(range(len(self)), n))
 
-#training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
+# training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
 # test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=False)
 # test_dataset = self_pairer(ORIGINAL_LFS_PATH)
 
