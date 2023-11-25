@@ -5,6 +5,7 @@
 #concat((torch.zeros(1,2,3), torch.zeros(1,2,3)), axis=1).shape
 
 import os
+from dotenv import load_dotenv
 
 from torch.utils.data import DataLoader, RandomSampler
 #from torchsummary import summary
@@ -16,6 +17,8 @@ import random
 #from torch.utils.data import DataLoader, RandomSampler
 import torch.optim as optim
 import functools
+
+from dataset_reader import LF_pair_lister_from_params
 random.seed(42)
 
 
@@ -60,12 +63,23 @@ batches = (10,)
 lr = 1e-5
 print('batch: ', batches)
 
+load_dotenv(".env")
+params = {
+    'views_w': 9,
+    'views_h' : 9,
+    'divider_block_h' : 32,
+    'divider_block_w' : 32,
+    'LF_mode' : '4d', # Opposed to lenslet
+    'dataset_root_path' : [os.environ["ORIGINAL_LFS_MV_RGB_9views"]], # Might have more than 1(the decoded)
+    'dataset_mode' : 'self_pairer', # Opposed to the pairwise_lister one
+}
+
 
 #print(os.listdir('/scratch/Decoded_LFs/png/decoded_32_noPartition'))
 #print(os.listdir('/scratch/Original_LFs/png'))
 
 
-
+dataset = LF_pair_lister_from_params(params)
 
 for batch in batches:
 

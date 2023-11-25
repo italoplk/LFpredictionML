@@ -7,6 +7,7 @@ from functools import reduce as fc_reduce
 import math
 from operator import __mul__
 from typing import Callable, Sequence
+import typing
 
 from torch.utils.data import Dataset
 
@@ -157,7 +158,7 @@ on_the_list = lambda candidate, l: any(test in candidate for test in l)
 
 class LF_pair_lister(ABC):
     @abstractclassmethod
-    def read_pair(self, lfclass : str, lf : str) -> Sequence[torch.Tensor, tuple[str, torch.Tensor]]:
+    def read_pair(self, lfclass : str, lf : str) -> tuple[torch.Tensor, Sequence[tuple[str, torch.Tensor]]]:
         raise NotImplemented()
 
 #modificar pairwise para retornar uma lista de blocos
@@ -240,12 +241,6 @@ class fold_dataset:
     def sampled(self, n):
         return (self[i] for i in sample(range(len(self)), n))
 
-load_dotenv("_dl4_LL.env")
-
-ORIGINAL_LFS_PATH_9views = os.environ["ORIGINAL_LFS_MV_RGB_9views"]
-#DECODED_LFS_PATH =  os.environ["DECODED_LFS_PATH"]
-
-training_dataset = self_pairer(ORIGINAL_LFS_PATH_9views, read_from_LF=read_LF, params = {'views_w': 9, 'views_h' : 9})
 #training_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=True)
 # test_dataset = pairwise_lister(ORIGINAL_LFS_PATH, DECODED_LFS_PATH, ["Bikes", "Danger_de_Mort", "Fountain___Vincent_2", "Stone_Pillars_Outside"], exclude=False)
 # test_dataset = self_pairer(ORIGINAL_LFS_PATH)
@@ -423,3 +418,26 @@ class reconstructor_lenslet:
         squared = np.einsum('...,...->...', diff, diff)
         views_MSE = reduce(squared, 'c (u s) (v t) -> c s t', 'mean', s=self.MI_SIZE, t=self.MI_SIZE)
         return views_MSE
+
+# dataset_mode[x] retorna alguma classe
+dataset_modes = {
+    'self_pairer' : self_pairer,
+    'pairwise_lister' : pairwise_lister,
+}
+read_lf_modes = {
+    'lenslet' : read_LF_lenslet,
+    '4d' : read_LF
+}
+K = typing.TypeVar('K')
+V = typing.TypeVar('V')
+
+def from_modes(modes : dict[K, V], key : K, error_message : str = 'Unknown key "{key}", expected any of "{allkeys}"') -> V:
+    try:
+        return modes[key]
+    except KeyError:
+        raise KeyError(error_message.format(key=key, allkeys=set(modes.keys())))
+
+def LF_pair_lister_from_params(params : dict[str]) -> LF_pair_lister:
+    build_dataset = from_modes(dataset_modes, params['dataset_mode'])
+    read_LF_funct = from_modes(read_lf_modes, params['LF_mode'])
+    return build_dataset(*params['dataset_root_path'], read_from_LF = read_LF_funct, params = params)
