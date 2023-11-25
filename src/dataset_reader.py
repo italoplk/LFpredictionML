@@ -111,7 +111,7 @@ def unnormalize_to_16bit_image_rgb(image):
     return (((image)*255.0).astype(np.uint16))
 
 #write the LFs after validation
-def write_LF_PMG(image, path, **kwargs : int):
+def write_LF_PNG(image, path, **kwargs : int):
     dims = kwargs if len(kwargs) != 0 else { 's' : 13, 't' : 13}
     image = rearrange(image, 'c s t u v -> (s u) (t v) c', **dims)
     image = unnormalize_to_16bit_image(image)
@@ -352,7 +352,7 @@ class reconstructor:
         self.i = new_i
     def save_image(self, filename):
         #print(self.shape)
-        write_LF_PMG(self.values, filename, s=self.s, t=self.t)
+        write_LF_PNG(self.values, filename, s=self.s, t=self.t)
 
     def compare(self, original):
         views_MSE = self.compare_MSE_by_view(original)
