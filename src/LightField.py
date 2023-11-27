@@ -7,12 +7,15 @@ import os
 
 class LightField:
 
-    def __init__(self, lf_path, lf_name):
-        self.name = lf_name
-        self.path = lf_path
-        self.classname = lf_path.split("/")[-1]
+    def __init__(self, lf_path):
+        self.full_path = lf_path
 
-        self.full_path = os.path.join(lf_path, lf_name)
+        self.dirs = os.path.split(self.full_path)
+        self.filename = self.dirs[-1]
+        self.classname = self.dirs[-2]
+        self.name = self.filename.split(".")[0] # Ignore format for the *name*
+
+        self.path = os.path.join(self.dirs[:-1])
 
     def __str__(self):
         return ', '.join([self.name, self.path, self.full_path])
@@ -38,6 +41,9 @@ class LightField:
             return ((image + is_prelu) / cls.normalizer_factor_8bit).astype(np.uint8)
         elif bit == 16:
             return ((image + is_prelu) / cls.normalizer_factor_16bit).astype(np.uint16)
+        else:
+            print("Image type not supported, implementation necessary.")
+            exit(255)
 
 
     # write the LFs after validation.
@@ -58,7 +64,7 @@ class LightField:
     # @TODO assumir que todo LF vai entrar previamente arranjado de acordo com o modelo
     def load_lf(self):
         try:
-            img = cv2.imread(self.path, cv2.IMREAD_UNCHANGED)
+            img = cv2.imread(self.full_path, cv2.IMREAD_UNCHANGED)
         except RuntimeError as e:
             print("Failed to open image path: ", e.__traceback__)
             exit()

@@ -1,4 +1,5 @@
 
+from glob import iglob
 from LightField import LightField
 from multipledispatch import dispatch
 
@@ -33,10 +34,8 @@ class DataSet:
         return ', '.join([self.path])
 
     def load_paths(self):
-        for lf_class in os.listdir(self.path):
-            path_class = os.path.join(self.path, lf_class)
-            for lf_name in os.listdir(path_class):
-                self.list_lfs.append(LightField(path_class, lf_name))
+        for lf_path in iglob(f"{self.path}/*/*"):
+            self.list_lfs.append(LightField(lf_path))
 
 
     #TODO method not finished. Finish if/when necessary
