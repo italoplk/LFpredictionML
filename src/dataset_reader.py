@@ -437,7 +437,7 @@ def from_modes(modes : dict, key : K, error_message : str = 'Unknown key "{key}"
     except KeyError:
         raise KeyError(error_message.format(key=key, allkeys=set(modes.keys())))
 
-def LF_pair_lister_from_params(params : dict[str]) -> LF_pair_lister:
+def LF_pair_lister_from_params(params : dict) -> LF_pair_lister:
     build_dataset = from_modes(dataset_modes, params['dataset_mode'])
     read_LF_funct = from_modes(read_lf_modes, params['LF_mode'])
     return build_dataset(*params['dataset_root_path'], read_from_LF = read_LF_funct, params = params)
