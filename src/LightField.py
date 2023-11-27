@@ -8,14 +8,14 @@ import os
 class LightField:
 
     def __init__(self, lf_path, lf_name):
-        self.lf_name = lf_name
-        self.lf_path = lf_path
-        self.lf_class = lf_path.split("/")[-1]
+        self.name = lf_name
+        self.path = lf_path
+        self.classname = lf_path.split("/")[-1]
 
         self.full_path = os.path.join(lf_path, lf_name)
 
     def __str__(self):
-        return ', '.join([self.lf_name, self.lf_path, self.full_path])
+        return ', '.join([self.name, self.path, self.full_path])
 
 
     normalizer_factor_16bit = 2 / ((2 ** 16) - 1)
@@ -58,7 +58,7 @@ class LightField:
     # @TODO assumir que todo LF vai entrar previamente arranjado de acordo com o modelo
     def load_lf(self):
         try:
-            img = cv2.imread(self.lf_path, cv2.IMREAD_UNCHANGED)
+            img = cv2.imread(self.path, cv2.IMREAD_UNCHANGED)
         except RuntimeError as e:
             print("Failed to open image path: ", e.__traceback__)
             exit()
