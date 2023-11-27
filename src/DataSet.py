@@ -17,7 +17,7 @@ class DataSet:
         self.list_lfs = []
         self.list_train = []
         self.list_test = []
-        self.test_lf_names = ["Bikes.png", "Sophie_&_Vincent_3.png"]
+        self.test_lf_names = ["Bikes", "Danger_de_Mort", "Fountain_&_Vincent_2", "Stone_Pillars_Outside"]
 
         try:
             self.load_paths()
