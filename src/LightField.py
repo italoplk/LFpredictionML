@@ -42,7 +42,7 @@ class LightField:
 
     # write the LFs after validation.
     @classmethod#color can be L (luma) or RGB (gscale rgb)
-    def write_LF_PMG(cls, image: np.uint8, path: str, nviews_ver: int, nviews_hor: int, nbits: int,
+    def write_LF_PNG(cls, image: np.uint8, path: str, nviews_ver: int, nviews_hor: int, nbits: int,
                      color: str = 'L'):
         try:  # @TODO check ver and hor orders E np.uint8 image
             image = rearrange(image, 'c s t u v -> (s u) (t v) c', s=nviews_ver, t=nviews_hor)
