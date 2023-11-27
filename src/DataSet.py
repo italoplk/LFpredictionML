@@ -38,15 +38,13 @@ class DataSet:
             self.list_lfs.append(LightField(lf_path))
 
 
-    #TODO method not finished. Finish if/when necessary
-    # should split the dataset in train and test redefining the list_test acconrding to the train%
-    @dispatch(float)
-    def split(self, train_percentage: float):
-        train_size = int(len(self.list_lfs) * train_percentage)
-        test_size = len(self.list_lfs) - train_size
-        for lf in len(self.list_lfs):
-            if rand.random() < train_percentage:
-                self.list_train.append(lf)
+    @classmethod
+    def random_split(cls, list_lfs : list, train_percentage: float):
+        train_size = int(len(list_lfs) * train_percentage)
+        shuffled_lfs = rand.shuffle(list_lfs)
+        list_train = shuffled_lfs[:train_size]
+        list_validation = shuffled_lfs[train_size:]
+        return (list_train, list_validation)
 
     @dispatch()
     def split(self):
