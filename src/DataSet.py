@@ -51,7 +51,7 @@ class DataSet:
     @dispatch()
     def split(self):
         for lf in self.list_lfs:
-            if lf.lf_name not in self.test_lf_names:
+            if lf.name not in self.test_lf_names:
                 self.list_train.append(lf)
             else:
                 self.list_test.append(lf)
