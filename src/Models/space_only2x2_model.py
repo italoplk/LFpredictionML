@@ -9,9 +9,9 @@ class UNetSpace(nn.Module):
     def __init__(self, name, params):
         super().__init__()
         s, t, u, v = (params.num_views_ver, params.num_views_hor, params.predictor_size, params.predictor_size)
-        blocker = Rearrange('b c s t (bu u) (bv v) -> b (bu bv c) s t u v', u=u,v=v)
-        flatener = Rearrange('b c s t u v -> b c (s u) (t v)', s = s, t = t)
-        deflatener = Rearrange('b c (s u) (t v) -> b c s t u v', s = s, t = t)
+        blocker = Rearrange('b c (bu u s) (bv v t) -> b (bu bv c) (s u) (v t)', u=u,v=v, s = s, t = t)
+        #flatener = Rearrange('b c s t u v -> b c (s u) (t v)')
+        #deflatener = Rearrange('b c (s u) (t v) -> b c s t u v', s = s, t = t)
         flat_model = UNetLike([ # 18, 288²
             nn.Sequential(
                 Conv2d(6, 10, (2,2)), nn.PReLU(), # 10, 287²
@@ -76,7 +76,7 @@ class UNetSpace(nn.Module):
             ),
         ], compose = lambda x,y: x+y)
         self.blocker = blocker
-        self.f = nn.Sequential(flatener, flat_model, deflatener)
+        self.f = flat_model
         self.name = name + '.data'
         try:
             if os.path.exists(self.name):
@@ -88,8 +88,8 @@ class UNetSpace(nn.Module):
         torch.save(self.state_dict(), self.name)
     def forward(self, X):
         flip = torch.flip
-        X = self.blocker(X)[:, :3, :, :, :, :]
-        d, u, l = X[:, :1, :, :, :, :], X[:, 1:2, :, :, :, :], X[:, 2:3, :, :, :, :]
+        X = self.blocker(X)[:, :3, :, :]
+        d, u, l = X[:, :1, :, :], X[:, 1:2, :, :], X[:, 2:3, :, :]
         flipped = map(flip, (d, u, l), ((-2,-1), (-2,), (-1,)))
         X = torch.cat((X, *flipped), dim = 1)
         return self.f(X)
@@ -100,8 +100,8 @@ dims_out = (9,9,32,32)
 
 model = UNetSpace("unet_space", params)
 model.eval()
-zeros = torch.zeros(1, 1, *dims)
-zeros_t = torch.zeros(1, 1, *dims_out)
+zeros = torch.zeros(1, 1, dims[0]*dims[2], dims[1]*dims[3])
+zeros_t = torch.zeros(1, 1, dims_out[0]*dims_out[2], dims_out[1]*dims_out[3])
 lossf = nn.MSELoss()
 with torch.no_grad():
     x = model(zeros)
