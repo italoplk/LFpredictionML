@@ -10,12 +10,9 @@ class LightField:
     def __init__(self, lf_path):
         self.full_path = lf_path
 
-        self.dirs = os.path.split(self.full_path)
-        self.filename = self.dirs[-1]
-        self.classname = self.dirs[-2]
+        (self.path, self.filename) = os.path.split(self.full_path)
+        (_, self.classname) = os.path.split(self.full_path)
         self.name = self.filename.split(".")[0] # Ignore format for the *name*
-        self.path = os.path.join(self.dirs[:-1])
-        self.img_array = np.array(1)
 
     def __str__(self):
         return ', '.join([self.name, self.path, self.full_path])
