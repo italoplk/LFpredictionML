@@ -13,6 +13,8 @@ class Trainer:
         # TODO make loss GREAT AGAIN, nope, make it a param.
         self.loss = nn.MSELoss()
         self.params = params
+        self.effective_predictor_size_v = self.param.num_views_ver * self.param.predictor_size
+        self.effective_predictor_size_h = self.param.num_views_hor * self.param.predictor_size
 
         # TODO after everything else is done, adapt for other models
         self.model = ModelOracle(params.model).get_model(config_name, params)
@@ -55,7 +57,7 @@ class Trainer:
                 if torch.cuda.is_available():
                     neighborhood, base = (neighborhood.cuda(), base.cuda())
                 predicted = self.model(neighborhood)
-                loss = self.loss(predicted[:,:,:,:], actual_block[:,:,-288:,-288:])
+                loss = self.loss(predicted[:,:,:,:], actual_block[:,:,-self.effective_predictor_size_v:,-self.effective_predictor_size_h:])
                 loss.backward()
                 acc += loss.cpu().item() * current_batch_size
                 batches_now += current_batch_size
