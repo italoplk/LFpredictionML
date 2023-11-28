@@ -14,7 +14,7 @@ class Trainer:
         self.loss = nn.MSELoss()
 
         # TODO after everything else is done, adapt for other models
-        self.model = ModelOracle(params.model_name).get_model(config_name, params)
+        self.model = ModelOracle(params.model).get_model(config_name, params)
         # TODO make AMERICA GREAT AGAIN, nope.... Num works be a parameter too
         # TODO test prefetch_factor and num_workers to optimize
         self.train_set = DataLoader(dataset.list_train, shuffle=True, num_workers=1,
