@@ -8,11 +8,11 @@ def main():
 
     dataset = DataSet(params)
     dataset.split()
-    for lf in dataset.list_train:
+    for lf in dataset.list_train.inner_storage:
         print(lf.name)
 
-    for lf in dataset.list_test:
-        print(lf)
+    for lf in dataset.list_test.inner_storage:
+        print(lf.name)
 
     config_name = f"{params.model}_{params.batch_size}_{params.lr}"
     Trainer(dataset, config_name, params)
