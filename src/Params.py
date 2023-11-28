@@ -54,7 +54,6 @@ def get_args():
                         help='path to latest checkpoint (default: none)')
 
     parser.add_argument('--model', default='Unet2k', type=str)
-    parser.add_argument('--epochs', default=100, type=int, help="Number of epochs to train")
 
 
     args = parser.parse_args()
