@@ -13,8 +13,8 @@ class Trainer:
         # TODO make loss GREAT AGAIN, nope, make it a param.
         self.loss = nn.MSELoss()
         self.params = params
-        self.effective_predictor_size_v = self.param.num_views_ver * self.param.predictor_size
-        self.effective_predictor_size_h = self.param.num_views_hor * self.param.predictor_size
+        self.effective_predictor_size_v = self.params.num_views_ver * self.params.predictor_size
+        self.effective_predictor_size_h = self.params.num_views_hor * self.params.predictor_size
 
         # TODO after everything else is done, adapt for other models
         self.model = ModelOracle(params.model).get_model(config_name, params)
@@ -50,7 +50,7 @@ class Trainer:
         for i, data in enumerate(self.train_set):
             #print(data.shape)
             # possible TODO: make MI_Size take a tuple
-            referencer = LensletBlockedReferencer(data, data, MI_size=self.params.num_views_ver)
+            referencer = LensletBlockedReferencer(data, data, MI_size=self.params.num_views_ver, N = self.params.predictor_size)
             loader = DataLoader(referencer, batch_size=self.params.batch_size)
             for neighborhood, actual_block in loader:
                 current_batch_size = actual_block.shape[0]

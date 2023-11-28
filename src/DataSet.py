@@ -76,11 +76,11 @@ class LazyList(Dataset):
 
 class LensletBlockedReferencer(Dataset):
     # possible TODO: make MI_size take a tuple
-    def __init__(self, decoded, original, MI_size=13):
+    def __init__(self, decoded, original, MI_size=13, N=32):
         super().__init__()
         self.decoded = decoded[0, :1, :, :]
         self.original = original[0, :1, :, :]
-        self.N = 32 * MI_size
+        self.N = N * MI_size
         self.inner_shape = decoded.shape
         assert(self.decoded.shape == self.original.shape)
         self.shape = tuple(dim // self.N - 1 for dim in self.inner_shape[-2:])
