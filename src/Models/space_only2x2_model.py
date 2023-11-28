@@ -8,7 +8,7 @@ from Models.unetlike import UNetLike, preserving_dimensions, Repeat
 class UNetSpace(nn.Module):
     def __init__(self, name, params):
         super().__init__()
-        s, t, u, v = (params.num_views_ver, params.num_views_hor, params.context_size, params.context_size)
+        s, t, u, v = (params.num_views_ver, params.num_views_hor, params.predictor_size, params.predictor_size)
         blocker = Rearrange('b c s t (bu u) (bv v) -> b (bu bv c) s t u v', u=u,v=v)
         flatener = Rearrange('b c s t u v -> b c (s u) (t v)', s = s, t = t)
         deflatener = Rearrange('b c (s u) (t v) -> b c s t u v', s = s, t = t)
@@ -92,16 +92,16 @@ class UNetSpace(nn.Module):
         d, u, l = X[:, :1, :, :, :, :], X[:, 1:2, :, :, :, :], X[:, 2:3, :, :, :, :]
         flipped = map(flip, (d, u, l), ((-2,-1), (-2,), (-1,)))
         X = torch.cat((X, *flipped), dim = 1)
-        #print(X.shape)
         return self.f(X)
 params = Namespace()
 dims = (9,9,64,64)
-(params.num_views_ver, params.num_views_hor, params.context_size, params.context_size) = dims
+dims_out = (9,9,32,32)
+(params.num_views_ver, params.num_views_hor, params.predictor_size, params.predictor_size) = dims_out
 
 model = UNetSpace("unet_space", params)
 model.eval()
 zeros = torch.zeros(1, 1, *dims)
-zeros_t = torch.zeros(1, 1, *dims)
+zeros_t = torch.zeros(1, 1, *dims_out)
 lossf = nn.MSELoss()
 with torch.no_grad():
     x = model(zeros)
