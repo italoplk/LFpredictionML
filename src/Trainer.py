@@ -59,8 +59,8 @@ class ModelOracle:
             from Models.space_only2x2_model import UNetSpace
             # talvez faça mais sentido sò passar as variaveis necessarias do dataset
             self.model = UNetSpace
-    def get_model(self, *args, **kwargs):
+    def get_model(self, config_name, params):
         try:
-            return self.model(*args, **kwargs)
+            return self.model(config_name, params)
         except RuntimeError as e:
             print("Failed to import model: ", e)
