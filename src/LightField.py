@@ -1,6 +1,7 @@
+import torch
 import Params
 import numpy as np
-import cv2
+from PIL.Image import Image, open
 from einops import rearrange
 import os
 
@@ -61,16 +62,11 @@ class LightField:
     # @TODO assumir que todo LF vai entrar previamente arranjado de acordo com o modelo
     def load_lf(self):
         try:
-            img = cv2.imread(self.full_path, cv2.IMREAD_UNCHANGED)
+            img = open(self.full_path, 'r')
         except RuntimeError as e:
             print("Failed to open image path: ", e.__traceback__)
             exit()
-
-        # color conversion excludes other color channels
-        #@TODO supor que vai entrar em luma
-        img_luma = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
-        #return the normalized image
-        self.img_array = self.normalize_image(img_luma, img_luma.itemsize * 8)
+        return img
 
 
 #TODO block referencer maybe? __getitem__
