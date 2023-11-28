@@ -37,7 +37,7 @@ class Trainer:
             model.parameters(), lr=params.lr, betas=(0.9, 0.999))
 
 
-        for epoch in params.epochs:
+        for epoch in range(1, 1+params.epochs):
             loss = self.train(epoch)
 
     def train(self, current_epoch):
