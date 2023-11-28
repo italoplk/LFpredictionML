@@ -14,7 +14,8 @@ def main():
     for lf in dataset.list_test:
         print(lf)
 
-    print(len(dataset.list_train))
+    config_name = f"{params.model}_{params.batch_size}_{params.lr}"
+
 
 
 

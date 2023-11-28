@@ -1,9 +1,9 @@
 from torch.nn import Conv2d, ConvTranspose2d
-from einops.layers.torch import Rearrange, Reduce
+from einops.layers.torch import Reduce
 import torch
 import torch.nn as nn
 import os.path
-from unetlike import UNetLike, preserving_dimensions, Repeat
+from src.Models.unetlike import UNetLike, Repeat
 class UNetAngle(nn.Module):
     def __init__(self, name):
         super().__init__()

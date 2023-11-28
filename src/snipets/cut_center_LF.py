@@ -34,10 +34,10 @@ def cut_center(img):
 path='/home/machado/MultiView_RGB/'
 pathOut='/home/machado/MultiView_9x9_RGB/'
 
-for classe in (os.listdir(path)):
-    os.makedirs(os.path.join(pathOut, classe), exist_ok=True)
-    for lf in os.listdir(os.path.join(path,classe)):
-        lf_path= os.path.join(path,classe,lf)
-        img = (IMG.open(lf_path))
-        cuted_lf = cut_center(img)
-        cuted_lf.save(os.path.join(pathOut,classe,lf))
+classe = "Urban"
+os.makedirs(os.path.join(pathOut, classe), exist_ok=True)
+for lf in os.listdir(os.path.join(path,classe)):
+    lf_path= os.path.join(path,classe,lf)
+    img = (IMG.open(lf_path))
+    cuted_lf = cut_center(img)
+    cuted_lf.save(os.path.join(pathOut,classe,lf))

@@ -6,8 +6,6 @@
 
 import os
 import torch
-from torch.utils.data import DataLoader, RandomSampler
-
 
 # In[ ]:
 
@@ -37,12 +35,12 @@ with open("chosen_list.txt", "r") as foldfile:
     folds = json.loads(foldfile.read())
 #print(folds)
 
-from iterating_over_dataset import loop_dataset, reconstruct, train, test
+from iterating_over_dataset import loop_dataset, reconstruct, train
 import torch.nn as nn
 
 epochs = 100
 
-from space_model_8_small_kernels_stackflip_sum_y import UNetSpace
+from src.Models.space_model_8_small_kernels_stackflip_sum_y import UNetSpace
 
 import sys
 lrs = (1e-4,) if (len(sys.argv) < 2) else tuple(map(float, sys.argv[1:]))

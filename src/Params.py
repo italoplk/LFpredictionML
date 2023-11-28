@@ -7,16 +7,17 @@ def get_args():
     parser.add_argument('--seed', type=int, default=0, help='random seed (default: 0)')
     # Training parametes
     parser.add_argument('--dataset-path', type=str, default='/home/idm/Lenslet_Gscale',
-                        help='Direcory with training pngs in ODP format')
+                        help='Direcory with training pngs')
 
+    parser.add_argument('--test-path', type=str, default='/scratch/dataset/jvet_1stframe/png/',
+                        help='Direcory with test pngs')
 
 
     parser.add_argument('--n-crops', type=int, default=216, help='Number of crops for each image')
 
-    parser.add_argument('--test-path', type=str, default='/scratch/dataset/jvet_1stframe/png/',
-                        help='Direcory with test pngs in ODP format')
 
     # TODO we need a separate bithdepth switch for each dataset!
+    #block size in terms of macro pixels, must be multiplied by number of views in lenslet format
     parser.add_argument('--context-size', type=int, default=64,
                         help='Size of the context [64, 128] (default 64x64))')
     parser.add_argument('--predictor-size', type=int, default=32,
@@ -35,6 +36,15 @@ def get_args():
                         help="the lr scheduler (default: steplr)")
 
 
+    # parameters of the DataSet
+    parser.add_argument("--num_views_ver",  default=9,      type=int, help="Num Views Vertical")
+    parser.add_argument("--num_views_hor",  default=9,      type=int, help="Num Views Horizontally")
+    parser.add_argument("--resol_ver",      default=4992,   type=int, help="Vertical Resolution")
+    parser.add_argument("--resol_hor",      default=7488,   type=int, help="Horizontal Resolution")
+    parser.add_argument("--bit_depth",      default=8,      type=int, help="Bit Depth")
+
+
+
     parser.add_argument('--save', default='../runs/exp', type=str,
                         help='Output dir')
     parser.add_argument('--project-name', default='delete', type=str)
@@ -43,7 +53,7 @@ def get_args():
     parser.add_argument('--resume', default='', type=str, metavar='PATH',
                         help='path to latest checkpoint (default: none)')
 
-    parser.add_argument('--model', default='convUnet2k', type=str)
+    parser.add_argument('--model', default='Unet2k', type=str)
 
 
     args = parser.parse_args()

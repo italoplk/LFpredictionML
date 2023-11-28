@@ -4,10 +4,7 @@
 
 #torch.concat((torch.zeros(1,2,3), torch.zeros(1,2,3)), axis=1).shape
 
-import os
 import torch
-from torch.utils.data import DataLoader, RandomSampler
-
 
 # In[ ]:
 
@@ -15,7 +12,6 @@ from torch.utils.data import DataLoader, RandomSampler
 import random
 #from torch.utils.data import DataLoader, RandomSampler
 import torch.optim as optim
-import functools
 import wandb
 random.seed(42)
 
@@ -36,13 +32,11 @@ with open("chosen_list.txt", "r") as foldfile:
     folds = json.loads(foldfile.read())
 #print(folds)
 
-from iterating_over_dataset import loop_dataset, reconstruct, train, test
-from dataset_reader import training_dataset
 import torch.nn as nn
 
 epochs = 1
 
-from angle_model_8_y import UNetAngle
+from src.Models.angle_model_8_y import UNetAngle
 
 import sys
 lrs = (1e-4,) if (len(sys.argv) < 2) else tuple(map(float, sys.argv[1:]))

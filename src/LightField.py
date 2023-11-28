@@ -14,8 +14,8 @@ class LightField:
         self.filename = self.dirs[-1]
         self.classname = self.dirs[-2]
         self.name = self.filename.split(".")[0] # Ignore format for the *name*
-
         self.path = os.path.join(self.dirs[:-1])
+        self.img_array = np.array(1)
 
     def __str__(self):
         return ', '.join([self.name, self.path, self.full_path])
@@ -73,6 +73,10 @@ class LightField:
         #@TODO supor que vai entrar em luma
         img_luma = np.array(cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB))
         #return the normalized image
-        return self.normalize_image(img_luma, img_luma.itemsize * 8)
+        self.img_array = self.normalize_image(img_luma, img_luma.itemsize * 8)
 
+
+#TODO block referencer maybe? __getitem__
+    def get_block(self, index):
+        print(True)
 

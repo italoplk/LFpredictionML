@@ -8,12 +8,11 @@ import random as rand
 
 class DataSet:
     def __init__(self, params):
-        # self.path = params.word
-        # self.num_views_hor: params.word
-        # self.num_views_ver: params.word
-        # self.resol_ver: params.word
-        # self.resol_hor: params.word
-        # self.bit_depth = params.word
+        self.num_views_hor: params.num_views_hor
+        self.num_views_ver: params.num_views_ver
+        self.resol_ver: params.resol_ver
+        self.resol_hor: params.resol_hor
+        self.bit_depth = params.bit_depth
         self.path = params.dataset_path
         self.list_lfs = []
         self.list_train = []

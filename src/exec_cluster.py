@@ -7,7 +7,6 @@
 import os
 from dotenv import load_dotenv
 
-from torch.utils.data import DataLoader, RandomSampler
 #from torchsummary import summary
 
 # In[ ]:
@@ -25,7 +24,9 @@ random.seed(42)
 import itertools
 
 
-from iterating_over_dataset import loop_dataset, reconstruct, train, test
+from iterating_over_dataset import loop_dataset, reconstruct, train
+
+
 # from dataset_reader import test_dataset
 
 def random_split_n(data, kfolds):
@@ -44,7 +45,7 @@ with open("chosen_list.txt", "r") as foldfile:
 
 from torch import save
 import torch.nn as nn
-from space_only2x2_model import UNetSpace
+from Models.space_only2x2_model import UNetSpace
 
 import wandb
 
@@ -57,7 +58,6 @@ import wandb
 
 lossf = nn.MSELoss()
 
-import sys
 epochs = 5
 batches = (10,)
 lr = 1e-5
