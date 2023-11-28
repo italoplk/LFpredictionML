@@ -2,7 +2,7 @@ from argparse import Namespace
 from DataSet import DataSet
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader,BlockedReferencerLenslet
 from tqdm import tqdm
 
 
@@ -12,6 +12,7 @@ class Trainer:
         self.model_name = params.model
         # TODO make loss GREAT AGAIN, nope, make it a param.
         self.loss = nn.MSELoss()
+        self.params = params
 
         # TODO after everything else is done, adapt for other models
         self.model = ModelOracle(params.model).get_model(config_name, params)
