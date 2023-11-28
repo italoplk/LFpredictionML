@@ -78,15 +78,13 @@ class LensletBlockedReferencer(Dataset):
     # possible TODO: make MI_size take a tuple
     def __init__(self, decoded, original, MI_size=13):
         super().__init__()
-        self.decoded = decoded[0, :1, :, :]
-        self.original = original[:, :, :, :]
+        self.decoded = decoded[0, :, :, :]
+        self.original = original[0, :, :, :]
         self.N = 32 * MI_size
         self.inner_shape = decoded.shape
-        if(self.decoded.shape == self.original.shape):
-            self.shape = tuple(dim // self.N - 1 for dim in self.inner_shape[-2:])
-            assert(all(dim != 0 for dim in self.shape))
-        else:
-            self.shape = (0,0)
+        assert(self.decoded.shape == self.original.shape)
+        self.shape = tuple(dim // self.N - 1 for dim in self.inner_shape[-2:])
+        assert(all(dim != 0 for dim in self.shape))
         self.len = self.shape[0] * self.shape[1]
     def __len__(self):
         return self.len
