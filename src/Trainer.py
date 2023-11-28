@@ -34,7 +34,7 @@ class Trainer:
 
         # TODO check betas
         optimizer = torch.optim.Adam(
-            model.parameters(), lr=params.lr, betas=(0.9, 0.999))
+            self.model.parameters(), lr=params.lr, betas=(0.9, 0.999))
 
 
         for epoch in range(1, 1+params.epochs):
