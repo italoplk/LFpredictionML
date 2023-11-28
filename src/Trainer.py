@@ -36,7 +36,7 @@ class Trainer:
         self.loss = self.loss.to(device)
 
         # TODO check betas
-        optimizer = torch.optim.Adam(
+        self.optimizer = torch.optim.Adam(
             self.model.parameters(), lr=params.lr, betas=(0.9, 0.999))
 
 
@@ -59,6 +59,8 @@ class Trainer:
                 predicted = self.model(neighborhood)
                 loss = self.loss(predicted[:,:,:,:], actual_block[:,:,-self.effective_predictor_size_v:,-self.effective_predictor_size_h:])
                 loss.backward()
+                self.optimizer.step()
+                self.optimizer.zero_grad()
                 acc += loss.cpu().item() * current_batch_size
                 batches_now += current_batch_size
         
