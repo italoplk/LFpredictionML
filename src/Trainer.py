@@ -55,7 +55,7 @@ class Trainer:
                 if torch.cuda.is_available():
                     neighborhood, base = (neighborhood.cuda(), base.cuda())
                 predicted = self.model(neighborhood)
-                loss = self.loss(predicted, actual_block)
+                loss = self.loss(predicted[:,:,:,:], actual_block[:,:,-288:,-288:])
                 loss.backward()
                 acc += loss.cpu().item() * current_batch_size
                 batches_now += current_batch_size
