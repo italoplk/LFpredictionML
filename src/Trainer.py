@@ -60,7 +60,7 @@ class Trainer:
                 acc += loss.cpu().item() * current_batch_size
                 batches_now += current_batch_size
         
-        print(f"{current_epoch} -- {acc}")
+        print(f"{current_epoch} -- {acc/batches_now}")
 
 class ModelOracle:
     def __init__(self, model_name):
