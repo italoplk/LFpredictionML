@@ -1,3 +1,4 @@
+from argparse import Namespace
 from DataSet import DataSet
 import torch
 import torch.nn as nn
@@ -7,7 +8,7 @@ from tqdm import tqdm
 
 class Trainer:
 
-    def __init__(self, dataset: DataSet, config_name : str, params : dict):
+    def __init__(self, dataset: DataSet, config_name : str, params : Namespace):
         self.model_name = params.model
         # TODO make loss GREAT AGAIN, nope, make it a param.
         self.loss = nn.MSELoss()
