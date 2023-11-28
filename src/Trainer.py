@@ -14,37 +14,30 @@ class Trainer:
         self.loss = nn.MSELoss()
 
         # TODO after everything else is done, adapt for other models
-        if self.model_name == 'Unet2k':
-            try:
-                from Models.space_only2x2_model import UNetSpace
-                # talvez faça mais sentido sò passar as variaveis necessarias do dataset
-                model = UNetSpace(config_name, params)
-            except RuntimeError as e:
-                print("Failed to import model: ", e)
+        self.model = ModelOracle(params.model_name).get_model(config_name, params)
+        # TODO make AMERICA GREAT AGAIN, nope.... Num works be a parameter too
+        self.train_set = DataLoader(dataset.list_train, shuffle=True, batch_size=params.batch_size, num_workers=8,
+                                pin_memory=True)
+        self.val_set = DataLoader(dataset.list_test, shuffle=False, batch_size=params.batch_size, num_workers=8,
+                                pin_memory=True)
+        self.test_set = DataLoader(dataset.list_test, shuffle=False, batch_size=1, num_workers=8, pin_memory=True)
 
-            # TODO make AMERICA GREAT AGAIN, nope.... Num works be a parameter too
-            self.train_set = DataLoader(dataset.list_train, shuffle=True, batch_size=params.batch_size, num_workers=8,
-                                   pin_memory=True)
-            self.val_set = DataLoader(dataset.list_test, shuffle=False, batch_size=params.batch_size, num_workers=8,
-                                 pin_memory=True)
-            self.test_set = DataLoader(dataset.list_test, shuffle=False, batch_size=1, num_workers=8, pin_memory=True)
+        if torch.cuda.is_available():
+            model = model.cuda()
+            device = torch.device("cuda")
+        else:
+            print("Running on CPU!")
+            device = torch.device("cpu")
 
-            if torch.cuda.is_available():
-                model = model.cuda()
-                device = torch.device("cuda")
-            else:
-                print("Running on CPU!")
-                device = torch.device("cpu")
+        self.loss = self.loss.to(device)
 
-            self.loss = self.loss.to(device)
-
-            # TODO check betas
-            optimizer = torch.optim.Adam(
-                model.parameters(), lr=params.lr, betas=(0.9, 0.999))
+        # TODO check betas
+        optimizer = torch.optim.Adam(
+            model.parameters(), lr=params.lr, betas=(0.9, 0.999))
 
 
-            for epoch in params.epochs:
-                loss = self.train(epoch)
+        for epoch in params.epochs:
+            loss = self.train(epoch)
 
     def train(self, current_epoch):
         acc = 0
@@ -58,3 +51,15 @@ class Trainer:
 
 
             self.model.train()
+
+class ModelOracle:
+    def __init__(self, model_name):
+        if model_name == 'Unet2k':
+            from Models.space_only2x2_model import UNetSpace
+            # talvez faça mais sentido sò passar as variaveis necessarias do dataset
+            self.model = UNetSpace
+    def get_model(self, *args, **kwargs):
+        try:
+            return self.model(*args, **kwargs)
+        except RuntimeError as e:
+            print("Failed to import model: ", e)
