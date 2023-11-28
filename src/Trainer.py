@@ -59,6 +59,8 @@ class Trainer:
                 loss.backward()
                 acc += loss.cpu().item() * current_batch_size
                 batches_now += current_batch_size
+        
+        print(f"{current_epoch} -- {acc}")
 
 class ModelOracle:
     def __init__(self, model_name):

@@ -67,7 +67,6 @@ class LazyList(Dataset):
         self.inner_storage.append(elem)
     def __getitem__(self, i_index):
         X = self.inner_storage[i_index]
-        print(X)
         X = X.load_lf()
         for transform in self.transforms:
             X = transform(X)
