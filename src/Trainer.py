@@ -1,8 +1,8 @@
 from argparse import Namespace
-from DataSet import DataSet
+from DataSet import DataSet, LensletBlockedReferencer
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader,BlockedReferencerLenslet
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 
@@ -43,13 +43,22 @@ class Trainer:
 
     def train(self, current_epoch):
         acc = 0
-
+        batches_now = 0
+        self.model.train()
         for i, data in enumerate(self.train_set):
-
-
-            self.lf.load_lf()
-            self.lf.get_block()
-            self.model.train()
+            #print(data.shape)
+            # possible TODO: make MI_Size take a tuple
+            referencer = LensletBlockedReferencer(data, data, MI_size=self.params.num_views_ver)
+            loader = DataLoader(referencer, batch_size=self.params.batch_size)
+            for neighborhood, actual_block in loader:
+                current_batch_size = actual_block.shape[0]
+                if torch.cuda.is_available():
+                    neighborhood, base = (neighborhood.cuda(), base.cuda())
+                predicted = self.model(neighborhood)
+                loss = self.loss(predicted, actual_block)
+                loss.backward()
+                acc += loss.cpu().item() * current_batch_size
+                batches_now += current_batch_size
 
 class ModelOracle:
     def __init__(self, model_name):
