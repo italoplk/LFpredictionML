@@ -9,7 +9,7 @@ def main():
     dataset = DataSet(params)
     dataset.split()
     for lf in dataset.list_train:
-        print(lf.lf_name)
+        print(lf.name)
 
     for lf in dataset.list_test:
         print(lf)
