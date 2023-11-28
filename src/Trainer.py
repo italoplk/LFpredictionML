@@ -24,7 +24,7 @@ class Trainer:
         self.test_set = DataLoader(dataset.list_test, shuffle=False, num_workers=8, pin_memory=True)
 
         if torch.cuda.is_available():
-            model = model.cuda()
+            self.model.cuda()
             device = torch.device("cuda")
         else:
             print("Running on CPU!")
