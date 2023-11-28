@@ -46,7 +46,7 @@ class Trainer:
             for epoch in params.epochs:
                 loss = self.train(epoch)
 
-    def train(self, epoch):
+    def train(self, current_epoch):
         acc = 0
 
         for i, data in enumerate(self.train_set):
