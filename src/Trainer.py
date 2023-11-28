@@ -16,11 +16,12 @@ class Trainer:
         # TODO after everything else is done, adapt for other models
         self.model = ModelOracle(params.model_name).get_model(config_name, params)
         # TODO make AMERICA GREAT AGAIN, nope.... Num works be a parameter too
-        self.train_set = DataLoader(dataset.list_train, shuffle=True, batch_size=params.batch_size, num_workers=8,
+        # TODO test prefetch_factor and num_workers to optimize
+        self.train_set = DataLoader(dataset.list_train, shuffle=True, num_workers=1,
+                                pin_memory=True, prefetch_factor=2)
+        self.val_set = DataLoader(dataset.list_test, shuffle=False, num_workers=8,
                                 pin_memory=True)
-        self.val_set = DataLoader(dataset.list_test, shuffle=False, batch_size=params.batch_size, num_workers=8,
-                                pin_memory=True)
-        self.test_set = DataLoader(dataset.list_test, shuffle=False, batch_size=1, num_workers=8, pin_memory=True)
+        self.test_set = DataLoader(dataset.list_test, shuffle=False, num_workers=8, pin_memory=True)
 
         if torch.cuda.is_available():
             model = model.cuda()
