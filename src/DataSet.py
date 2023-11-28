@@ -1,6 +1,8 @@
 
 from glob import iglob
 from typing import List
+
+import torch
 from LightField import LightField
 from multipledispatch import dispatch
 
@@ -85,7 +87,7 @@ class LensletBlockedReferencer(Dataset):
             assert(all(dim != 0 for dim in self.shape))
         else:
             self.shape = (0,0)
-        self.len = fc_reduce(__mul__, self.shape, 1)
+        self.len = self.shape[0] * self.shape[1]
     def __len__(self):
         return self.len
     def __getitem__(self, x):
