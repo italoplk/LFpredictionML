@@ -1,3 +1,4 @@
+from argparse import Namespace
 from torch.nn import Conv2d, ConvTranspose2d
 from einops.layers.torch import Rearrange, Reduce
 import torch
@@ -7,7 +8,7 @@ from Models.unetlike import UNetLike, preserving_dimensions, Repeat
 class UNetSpace(nn.Module):
     def __init__(self, name, params):
         super().__init__()
-        s, t, u, v = (params['views_h'], params['views_w'], params['divider_block_h'], params['divider_block_w'])
+        s, t, u, v = (params.num_views_ver, params.num_views_hor, params.context_size, params.context_size)
         blocker = Rearrange('b c s t (bu u) (bv v) -> b (bu bv c) s t u v', u=u,v=v)
         flatener = Rearrange('b c s t u v -> b c (s u) (t v)', s = s, t = t)
         deflatener = Rearrange('b c (s u) (t v) -> b c s t u v', s = s, t = t)
@@ -93,16 +94,14 @@ class UNetSpace(nn.Module):
         X = torch.cat((X, *flipped), dim = 1)
         #print(X.shape)
         return self.f(X)
+params = Namespace()
+dims = (9,9,64,64)
+(params.num_views_ver, params.num_views_hor, params.context_size, params.context_size) = dims
 
-model = UNetSpace("unet_space", {
-    'views_h' : 9,
-    'views_w' : 9,
-    'divider_block_h' : 32,
-    'divider_block_w' : 32
-})
+model = UNetSpace("unet_space", params)
 model.eval()
-zeros = torch.zeros(1, 1, 9, 9, 64, 64)
-zeros_t = torch.zeros(1, 1, 9, 9, 32, 32)
+zeros = torch.zeros(1, 1, *dims)
+zeros_t = torch.zeros(1, 1, *dims)
 lossf = nn.MSELoss()
 with torch.no_grad():
     x = model(zeros)
