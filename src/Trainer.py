@@ -47,10 +47,7 @@ class Trainer:
 
 
             self.lf.load_lf()
-
             self.lf.get_block()
-
-
             self.model.train()
 
 class ModelOracle:
@@ -59,8 +56,16 @@ class ModelOracle:
             from Models.space_only2x2_model import UNetSpace
             # talvez faça mais sentido sò passar as variaveis necessarias do dataset
             self.model = UNetSpace
+        elif model_name == 'Unet3k':
+            from Models.space_model_8_small_kernels import UNetSpace
+            self.model = UNetSpace
+        else:
+            print("Model not Found.")
+            exit(404)
+
     def get_model(self, config_name, params):
         try:
             return self.model(config_name, params)
         except RuntimeError as e:
             print("Failed to import model: ", e)
+
