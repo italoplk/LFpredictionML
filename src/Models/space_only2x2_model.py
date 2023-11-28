@@ -3,7 +3,7 @@ from einops.layers.torch import Rearrange, Reduce
 import torch
 import torch.nn as nn
 import os.path
-from unetlike import UNetLike, preserving_dimensions, Repeat
+from Models.unetlike import UNetLike, preserving_dimensions, Repeat
 class UNetSpace(nn.Module):
     def __init__(self, name, params):
         super().__init__()
