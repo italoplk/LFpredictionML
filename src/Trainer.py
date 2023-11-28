@@ -1,5 +1,4 @@
 from DataSet import DataSet
-from Params import Params
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -8,7 +7,7 @@ from tqdm import tqdm
 
 class Trainer:
 
-    def __init__(self, dataset: DataSet, config_name : str, params : Params):
+    def __init__(self, dataset: DataSet, config_name : str, params : dict):
         self.model_name = params.model
         # TODO make loss GREAT AGAIN, nope, make it a param.
         self.loss = nn.MSELoss()
