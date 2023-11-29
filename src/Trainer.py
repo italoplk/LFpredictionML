@@ -78,7 +78,9 @@ class Trainer:
                 if torch.cuda.is_available():
                     neighborhood, actual_block = (neighborhood.cuda(), actual_block.cuda())
                 predicted = self.model(neighborhood)
-                loss = self.loss(predicted[:,:,:,:], actual_block[:,:,-self.effective_predictor_size_v:,-self.effective_predictor_size_h:])
+                predicted = predicted[:,:,-self.effective_predictor_size_v:,-self.effective_predictor_size_h:]
+                actual_block = actual_block[:,:,-self.effective_predictor_size_v:,-self.effective_predictor_size_h:]
+                loss = self.loss(predicted,actual_block)
                 if val == 0:
                     self.optimizer.zero_grad()
                     loss.backward()
@@ -99,7 +101,7 @@ class Trainer:
 class ModelOracle:
     def __init__(self, model_name):
         if model_name == 'Unet2k':
-            from Models.space_only2x2_model import UNetSpace
+            from Models.space_only2x2_1channel import UNetSpace
             # talvez faça mais sentido sò passar as variaveis necessarias do dataset
             self.model = UNetSpace
         elif model_name == 'Unet3k':
