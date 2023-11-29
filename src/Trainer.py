@@ -93,9 +93,8 @@ class Trainer:
                     wandb.log({f"Batch_MSE_global":  loss.cpu().item()})
                 # else:
                 #     wandb.log({f"Batch_MSE_VAL_global": loss.cpu().item()})
-                loss_epoch = acc/batches_now
 
-        return loss_epoch
+        return acc/batches_now
 
 
 class ModelOracle:
