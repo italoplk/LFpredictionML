@@ -85,14 +85,16 @@ class Trainer:
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
-                # what is acc loss batch?
-                acc += loss.cpu().item() * current_batch_size
+                # loss = Mean over batches... so we weight the loss by the batch
+                loss = loss.cpu().item()
+                acc += loss * current_batch_size
                 batches_now += current_batch_size
-                if val == 0 and wandb:
-                    wandb.log({f"Batch_MSE_era_{current_epoch}": loss.cpu().item()})
-                    wandb.log({f"Batch_MSE_global":  loss.cpu().item()})
-                # else:
-                #     wandb.log({f"Batch_MSE_VAL_global": loss.cpu().item()})
+                if wandb:
+                    if val == 0:
+                        wandb.log({f"Batch_MSE_era_{current_epoch}": loss})
+                        wandb.log({f"Batch_MSE_global":  loss})
+                    else:
+                        wandb.log({f"Batch_MSE_VAL_global": loss})
 
         return acc/batches_now
 
