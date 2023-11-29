@@ -102,7 +102,7 @@ class Trainer:
 class ModelOracle:
     def __init__(self, model_name):
         if model_name == 'Unet2k':
-            from Models.space_only2x2_1channel import UNetSpace
+            from Models.space_only2x2_1channel_8_32x8_32 import UNetSpace
             # talvez faça mais sentido sò passar as variaveis necessarias do dataset
             self.model = UNetSpace
         elif model_name == 'Unet3k':
