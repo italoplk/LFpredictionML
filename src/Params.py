@@ -45,8 +45,9 @@ def get_args():
     parser.add_argument("--bit_depth",      default=8,      type=int, help="Bit Depth")
     parser.add_argument("--limit-train",    default=0,      type=int, help="Max num of LFs to train. (FOR QUICK TEST PURPOUSES ONLY)")
 
-    parser.add_argument("--wandb", default=True, type=bool,
+    parser.add_argument("--wandb", default=True, action='store_true',
                         help="False for deactivating wandb")
+    parser.add_argument('--no-wandb', dest='wandb', action='store_false')
 
     parser.add_argument('--save', default='../runs/exp', type=str,
                         help='Output dir')
