@@ -9,20 +9,20 @@ def main():
 
     config_name = f"{params.model}_{params.batch_size}_{params.lr}"
 
-
-    wandb.init(
-        # set the wandb project where this run will be logged
-        project="predictorUnet",
-        # track hyperparameters and run metadata
-        name=config_name,
-        config={
-            "learning_rate": params.lr,
-            "architecture": f"{params.model}",
-            "dataset": params.dataset_name,
-            "epochs": params.epochs,
-            "name": f"{config_name}"
-        }
-    )
+    if params.wandb:
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project="predictorUnet",
+            # track hyperparameters and run metadata
+            name=config_name,
+            config={
+                "learning_rate": params.lr,
+                "architecture": f"{params.model}",
+                "dataset": params.dataset_name,
+                "epochs": params.epochs,
+                "name": f"{config_name}"
+            }
+        )
 
 
     dataset = DataSet(params)
@@ -36,7 +36,8 @@ def main():
 
     Trainer(dataset, config_name, params)
 
-    wandb.finish()
+    if params.wandb:
+        wandb.finish()
 
 
 

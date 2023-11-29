@@ -41,25 +41,30 @@ class Trainer:
 
 
         for epoch in range(1, 1+params.epochs):
-            loss = self.train(epoch, 0)
+            loss = self.train(epoch, 0, params.wandb)
             print(f"Epoch {epoch}: {loss}")
-            wandb.log({f"MSE_era": loss})
 
-            loss = self.train(epoch, 1)
+            if params.wandb:
+                wandb.log({f"MSE_era": loss})
+
+            loss = self.train(epoch, 1, params.wandb)
             print(f"Val {epoch}: {loss}")
-            wandb.log({f"MSE_VAL_era": loss})
+            if params.wandb:
+                wandb.log({f"MSE_VAL_era": loss})
 
 
 
 
-    def train(self, current_epoch, val):
+    def train(self, current_epoch, val, wandb):
         acc = 0
         batches_now = 0
         if val == 0:
             self.model.train()
             set = self.train_set
         else:
+            # TODO validation set
             set = self.test_set
+            self.model.eval()
 
         for i, data in enumerate(set):
             #print(data.shape)
@@ -81,7 +86,7 @@ class Trainer:
                 # what is acc loss batch?
                 acc += loss.cpu().item() * current_batch_size
                 batches_now += current_batch_size
-                if val == 0:
+                if val == 0 and wandb:
                     wandb.log({f"Batch_MSE_era_{current_epoch}": loss.cpu().item()})
                     wandb.log({f"Batch_MSE_global":  loss.cpu().item()})
                 # else:

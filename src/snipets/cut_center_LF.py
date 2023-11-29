@@ -21,23 +21,23 @@ def cut_center(img):
     lf = np.array(lf)
     lf = einops.rearrange(lf, '(v h) (u w) c -> c u v h w', u=13, v=13)
     print(f"lf.shape = {lf.shape}")
-    lf2 = cut_center_LF(lf, (9, 9))
+    lf2 = cut_center_LF(lf, (8, 8))
     print(f"lf2.shape = {lf2.shape}")
-    assert ((lf2 == lf[:, 2:-2, 2:-2, :, :]).all())
+    assert ((lf2 == lf[:, 2:-3, 2:-3, :, :]).all())
 
-    lf2 = einops.rearrange(lf2, 'c u v h w -> (v h) (u w) c',  u=9, v=9)
+    lf2 = einops.rearrange(lf2, 'c u v h w -> (v h) (u w) c',  u=8, v=8)
 
 
     data = im.fromarray(lf2)
     return data
     # data.save('/home/idm/cut.png')
 path='/home/machado/MultiView_RGB/'
-pathOut='/home/machado/MultiView_9x9_RGB/'
+pathOut='/home/machado/MultiView_8x8_RGB/'
 
-classe = "Urban"
-os.makedirs(os.path.join(pathOut, classe), exist_ok=True)
-for lf in os.listdir(os.path.join(path,classe)):
-    lf_path= os.path.join(path,classe,lf)
-    img = (IMG.open(lf_path))
-    cuted_lf = cut_center(img)
-    cuted_lf.save(os.path.join(pathOut,classe,lf))
+for classe in os.listdir(path):
+    os.makedirs(os.path.join(pathOut, classe), exist_ok=True)
+    for lf in os.listdir(os.path.join(path,classe)):
+        lf_path= os.path.join(path,classe,lf)
+        img = (IMG.open(lf_path))
+        cuted_lf = cut_center(img)
+        cuted_lf.save(os.path.join(pathOut,classe,lf))
