@@ -21,26 +21,22 @@ class UNetSpace(nn.Module):
             nn.Sequential( # 10, 286²
                 Conv2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 143²
                 Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 142²
-                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 141²
-                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 140²
             ),
-            nn.Sequential( # 10, 140²
-                Conv2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 70²
-                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 69²
-                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 68²
+            nn.Sequential( # 10, 142²
+                Conv2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 71²
+                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 70²
             ),
-            nn.Sequential( # 10, 68²
-                Conv2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 34²
-                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 33²
-                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 32²
+            nn.Sequential( # 10, 70²
+                Conv2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 35²
+                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 34²
             ),
             nn.Sequential( # 10, 32²
-                Conv2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 16²
-                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 15²
-                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 14²
+                Conv2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 17²
+                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 16²
             ),
-            nn.Sequential( # 10, 14²
-                Conv2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 7²
+            nn.Sequential( # 10, 16²
+                Conv2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 8²
+                Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 7²
                 Conv2d(10, 10, (2,2)), nn.PReLU(), # 10, 6²
             ),
             nn.Sequential( # 10, 6²
@@ -56,26 +52,22 @@ class UNetSpace(nn.Module):
             ),
             nn.Sequential( # 10, 6²
                 ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 7²
-                ConvTranspose2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 14²
+                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 8²
+                ConvTranspose2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 16²
             ),
-            nn.Sequential( # 10, 14²
-                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 15²
-                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 16²
-                ConvTranspose2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 32²
+            nn.Sequential( # 10, 16²
+                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 17²
+                ConvTranspose2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 34²
             ),
-            nn.Sequential( # 10, 32²
-                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 33²
-                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 34²
-                ConvTranspose2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 68²
+            nn.Sequential( # 10, 34²
+                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 35²
+                ConvTranspose2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 70²
             ),
-            nn.Sequential( # 10, 68²
-                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 69²
-                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 70²
-                ConvTranspose2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 140²
+            nn.Sequential( # 10, 70²
+                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 71²
+                ConvTranspose2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 142²
             ),
-            nn.Sequential( # 10, 140²
-                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 141²
-                ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 142²
+            nn.Sequential( # 10, 142²
                 ConvTranspose2d(10, 10, (2,2)), nn.PReLU(), # 10, 143²
                 ConvTranspose2d(10, 10, (2,2), stride=(2,2)), nn.PReLU(), # 10, 286²
             ),
