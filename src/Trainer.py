@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-
+import wandb
 
 class Trainer:
 
@@ -41,30 +41,55 @@ class Trainer:
 
 
         for epoch in range(1, 1+params.epochs):
-            loss = self.train(epoch)
+            loss = self.train(epoch, 0)
+            print(f"Epoch {epoch}: {loss}")
+            wandb.log({f"MSE_era": loss})
 
-    def train(self, current_epoch):
+            loss = self.train(epoch, 1)
+            print(f"Val {epoch}: {loss}")
+            wandb.log({f"MSE_VAL_era": loss})
+
+
+
+
+    def train(self, current_epoch, val):
         acc = 0
         batches_now = 0
-        self.model.train()
-        for i, data in enumerate(self.train_set):
+        if val == 0:
+            self.model.train()
+            set = self.train_set
+        else:
+            set = self.test_set
+
+        for i, data in enumerate(set):
             #print(data.shape)
+            # TODO ta fazendo 4 batches por lf apenas. Tamo fazendo soh 4 crop?
             # possible TODO: make MI_Size take a tuple
             referencer = LensletBlockedReferencer(data, data, MI_size=self.params.num_views_ver, N = self.params.predictor_size)
             loader = DataLoader(referencer, batch_size=self.params.batch_size)
+
             for neighborhood, actual_block in loader:
                 current_batch_size = actual_block.shape[0]
                 if torch.cuda.is_available():
-                    neighborhood, base = (neighborhood.cuda(), base.cuda())
+                    neighborhood, actual_block = (neighborhood.cuda(), actual_block.cuda())
                 predicted = self.model(neighborhood)
                 loss = self.loss(predicted[:,:,:,:], actual_block[:,:,-self.effective_predictor_size_v:,-self.effective_predictor_size_h:])
-                loss.backward()
-                self.optimizer.step()
-                self.optimizer.zero_grad()
+                if val == 0:
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    self.optimizer.step()
+                # what is acc loss batch?
                 acc += loss.cpu().item() * current_batch_size
                 batches_now += current_batch_size
-        
-        print(f"{current_epoch} -- {acc/batches_now}")
+                if val == 0:
+                    wandb.log({f"Batch_MSE_era_{current_epoch}": loss.cpu().item()})
+                    wandb.log({f"Batch_MSE_global":  loss.cpu().item()})
+                # else:
+                #     wandb.log({f"Batch_MSE_VAL_global": loss.cpu().item()})
+                loss_epoch = acc/batches_now
+
+        return loss_epoch
+
 
 class ModelOracle:
     def __init__(self, model_name):

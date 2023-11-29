@@ -6,10 +6,10 @@ def get_args():
     # Random seed for np and tf (-1 to avoid seeding)
     parser.add_argument('--seed', type=int, default=0, help='random seed (default: 0)')
     # Training parametes
-    parser.add_argument('--dataset-path', type=str, default='/home/idm/Lenslet_Gscale',
+    parser.add_argument('--dataset-path', type=str, default='/home/machado/Lenslet_Gscale',
                         help='Direcory with training pngs')
 
-    parser.add_argument('--test-path', type=str, default='/scratch/dataset/jvet_1stframe/png/',
+    parser.add_argument('--test-path', type=str, default='/home/machado/Lenslet_Gscale',
                         help='Direcory with test pngs')
 
 
@@ -37,11 +37,13 @@ def get_args():
 
 
     # parameters of the DataSet
+    parser.add_argument("--dataset-name",   default='EPFL', type=str, help="Name of the dataset. (For loggin purpouses only. So far)")
     parser.add_argument("--num_views_ver",  default=9,      type=int, help="Num Views Vertical")
     parser.add_argument("--num_views_hor",  default=9,      type=int, help="Num Views Horizontally")
     parser.add_argument("--resol_ver",      default=4992,   type=int, help="Vertical Resolution")
     parser.add_argument("--resol_hor",      default=7488,   type=int, help="Horizontal Resolution")
     parser.add_argument("--bit_depth",      default=8,      type=int, help="Bit Depth")
+    parser.add_argument("--limit-train",    default=0,      type=int, help="Max num of LFs to train. (FOR QUICK TEST PURPOUSES ONLY)")
 
 
 

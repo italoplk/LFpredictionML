@@ -12,13 +12,18 @@ from unetlike import UNetLike, preserving_dimensions, Repeat
 class UNetSpace(nn.Module):
     def __init__(self, name):
         super().__init__()
-        s, t = (13,13)
+        s, t = (13, 13)
+        # spatial
+        # blocker = Rearrange('b c s t (bu u) (bv v) -> b (bu bv c) s t u v', u=32,v=32)
+        # flatener = Rearrange('b c s t u v -> b c (s u) (t v)', s = s, t = t)
+        # deflatener = Rearrange('b c (s u) (t v) -> b c s t u v', s = s, t = t)
         blocker = Rearrange('b c s t (bu u) (bv v) -> b (bu bv c) s t u v', u=32,v=32)
-        flatener = Rearrange('b c s t u v -> b c (s u) (t v)', s = s, t = t)
-        deflatener = Rearrange('b c (s u) (t v) -> b c s t u v', s = s, t = t)
+        flatener = Rearrange('b c u v s t -> b c (s u) (t v)', s = s, t = t)
+        deflatener = Rearrange('b c (s u) (t v) -> b c u v s t', s = s, t = t)
+
         flat_model = UNetLike([
             nn.Sequential(#10 chanels arbitrary
-                preserving_dimensions(Conv2d, 6, 10), nn.PReLU()  # 10, 416, 416
+                preserving_dimensions(Conv2d, 1, 10), nn.PReLU()  # 10, 416, 416
             ),
             nn.Sequential(
                 Conv2d(10, 10, (2,2), 2),  nn.PReLU(),  # 10, 208, 208

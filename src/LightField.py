@@ -12,7 +12,7 @@ class LightField:
         self.full_path = lf_path
 
         (self.path, self.filename) = os.path.split(self.full_path)
-        (_, self.classname) = os.path.split(self.full_path)
+        (_, self.class_name) = os.path.split(self.full_path)
         self.name = self.filename.split(".")[0] # Ignore format for the *name*
 
     def __str__(self):

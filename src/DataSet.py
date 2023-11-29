@@ -4,7 +4,7 @@ from typing import List
 
 import torch
 from LightField import LightField
-from multipledispatch import dispatch
+# from multipledispatch import dispatch
 
 import os
 import random as rand
@@ -19,6 +19,7 @@ class DataSet:
         self.resol_hor: params.resol_hor
         self.bit_depth = params.bit_depth
         self.path = params.dataset_path
+        self.limit_train = params.limit_train
         self.list_lfs = LazyList([], transforms = [ToTensor()])
         self.list_train = LazyList([], transforms = [ToTensor()])
         self.list_test = LazyList([], transforms = [ToTensor()])
@@ -33,6 +34,9 @@ class DataSet:
         if len(self.list_lfs) == 0:
             print("Failed to find LFs at path: ", self.path)
             exit(12)
+
+
+
     # TODO add new dataset variables at __str__
     def __str__(self):
         return ', '.join([self.path])
@@ -50,13 +54,15 @@ class DataSet:
         list_validation = shuffled_lfs[train_size:]
         return (list_train, list_validation)
 
-    @dispatch()
+    # @dispatch()
     def split(self):
         for lf in self.list_lfs.inner_storage:
             if lf.name not in self.test_lf_names:
-                self.list_train.append(lf)
+                if (len(self.list_train) < self.limit_train or self. limit_train == -1 ):
+                    self.list_train.append(lf)
             else:
                 self.list_test.append(lf)
+
 
 
 class LazyList(Dataset):
