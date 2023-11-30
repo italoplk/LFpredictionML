@@ -51,6 +51,7 @@ def get_args():
     parser.add_argument('--save', default='../runs/exp', type=str,
                         help='Output dir')
     parser.add_argument('--project-name', default='delete', type=str)
+    parser.add_argument('--run-name', default='', type=str)
 
     #@TODO automatizar resuming simulations
     parser.add_argument('--resume', default='', type=str, metavar='PATH',

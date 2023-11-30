@@ -1,7 +1,7 @@
-import torch.nn as nn
 import torch
-
+import torch.nn as nn
 from einops.layers.torch import Reduce
+
 
 def preserving_dimensions(module_type, channels_in, channels_out):
     return module_type(channels_in, channels_out, 3, 1, 1)
@@ -24,10 +24,10 @@ class UNetLike(nn.Module):
     def forward(self, X):
         paths = []
         for enc in self.encoder:
-            #print(X.shape)
+            # print(X.shape)
             paths.append(X)
             X = enc(X)
-        #print(X.shape)
+        # print(X.shape)
         X = self.decoder[0](X)
         for s, dec in zip(paths[::-1], self.decoder[1:]):
             #print(X.shape, s.shape)

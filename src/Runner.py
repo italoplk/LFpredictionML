@@ -9,7 +9,7 @@ from Trainer import Trainer
 def main():
     params = get_args()
 
-    config_name = f"{params.model}_{params.batch_size}_{params.lr}"
+    config_name = f"{params.run_name}{params.model}_{params.batch_size}_{params.lr}"
 
     if params.wandb_active:
         wandb.init(

@@ -14,48 +14,50 @@ class UNetSpace(nn.Module):
 
         print(s, t, u, v)
 
-        flat_model = UNetLike([ # 18, 512²
+
+        flat_model = UNetLike([  # 18, 512²
             nn.Sequential(
-                Conv2d(1, 10, 3, stride=1), nn.PReLU(), # 10, 512²
-                Conv2d(1, 10, 3, stride=2), nn.PReLU(),  # 10, 512²
-
-            )
+                Conv2d(1, 10, 3, stride=1), nn.PReLU(),  # 10, 512²
+                Conv2d(10, 10, 3, stride=2), nn.PReLU(),  # 10, 254²
+            ),
+            nn.Sequential(
+                Conv2d(10, 10, 3, stride=1), nn.PReLU(),  # 10, 512²
+                Conv2d(10, 10, 3, stride=2, padding=1), nn.PReLU(),  # 10, 512²
+            ),
+            nn.Sequential(
+                Conv2d(10, 10, 3, stride=1), nn.PReLU(),  # 10, 512²
+                Conv2d(10, 10, 3, stride=2, padding=1), nn.PReLU(),  # 10, 512²
+            ),
+            nn.Sequential(
+                Conv2d(10, 10, 3, stride=1), nn.PReLU(),  # 10, 512²
+                Conv2d(10, 10, 3, stride=2, padding=1), nn.PReLU(),  # 10, 512²
+            ),
+            nn.Sequential(
+                Conv2d(10, 10, 3, stride=1), nn.PReLU(),  # 10, 512²
+                Conv2d(10, 10, 3, stride=2, padding=1), nn.PReLU(),  # 10, 512²
+            ),
         ], [
-            nn.Sequential( # 10, 1²
-                ConvTranspose2d(10, 10, (2, 2), stride=1, padding=1), nn.PReLU(),  # 10, 6²
+            nn.Sequential(  # 10, 510²
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 10, (2,2), stride=1), nn.PReLU(), # 10, 6²
+                ConvTranspose2d(10, 10, 3, stride=1), nn.PReLU(),  # 1, 512²
             ),
-            nn.Sequential( # 10, 6²
+            nn.Sequential(  # 10, 510²
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 10, (2,2), stride=1), nn.PReLU(), # 10, 7²
+                ConvTranspose2d(10, 1, 3, stride=1), nn.PReLU(),  # 1, 512²
             ),
-            nn.Sequential( # 10, 14²
+            nn.Sequential(  # 10, 510²
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 10, (2,2), stride=1), nn.PReLU(), # 10, 15²
+                ConvTranspose2d(10, 1, 3, stride=1), nn.PReLU(),  # 1, 512²
+            ),
+            nn.Sequential(  # 10, 510²
+                nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
+                ConvTranspose2d(10, 1, 3, stride=1), nn.PReLU(),  # 1, 512²
+            ),
+            nn.Sequential(  # 10, 510²
+                nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
+                ConvTranspose2d(10, 1, 3, stride=1), nn.Sigmoid(),  # 1, 512²
+            ),
 
-            ),
-            nn.Sequential( # 10, 30²
-                nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 10, (2,2), stride=1), nn.PReLU(), # 10, 31²
-
-            ),
-            nn.Sequential( # 10, 62²
-                nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
-                ConvTranspose2d(10, 10, (2,2), stride=1), nn.PReLU(), # 10, 126²
-            ),
-            nn.Sequential( # 10, 126²
-                nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 10, (2,2), stride=1), nn.PReLU(), # 10, 254²
-            ),
-            nn.Sequential( # 10, 254²
-                nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 10, (2,2), stride=1), nn.PReLU(), # 10, 510²
-            ),
-            nn.Sequential( # 10, 510²
-                nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 1, (2,2), stride=1), nn.Sigmoid(), # 1, 512²
-            ),
         ], compose=lambda x, y: x+y)
         self.f = flat_model
         self.name = name + '.data'
