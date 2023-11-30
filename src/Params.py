@@ -38,16 +38,15 @@ def get_args():
 
     # parameters of the DataSet
     parser.add_argument("--dataset-name",   default='EPFL', type=str, help="Name of the dataset. (For loggin purpouses only. So far)")
-    parser.add_argument("--num_views_ver",  default=9,      type=int, help="Num Views Vertical")
-    parser.add_argument("--num_views_hor",  default=9,      type=int, help="Num Views Horizontally")
-    parser.add_argument("--resol_ver",      default=4992,   type=int, help="Vertical Resolution")
-    parser.add_argument("--resol_hor",      default=7488,   type=int, help="Horizontal Resolution")
+    parser.add_argument("--num_views_ver",  default=8,      type=int, help="Num Views Vertical")
+    parser.add_argument("--num_views_hor",  default=8,      type=int, help="Num Views Horizontally")
+    parser.add_argument("--resol_ver",      default=3456,   type=int, help="Vertical Resolution")
+    parser.add_argument("--resol_hor",      default=4960,   type=int, help="Horizontal Resolution")
     parser.add_argument("--bit_depth",      default=8,      type=int, help="Bit Depth")
-    parser.add_argument("--limit-train",    default=0,      type=int, help="Max num of LFs to train. (FOR QUICK TEST PURPOUSES ONLY)")
+    parser.add_argument("--limit-train",    default=-1,      type=int, help="Max num of LFs to train. (FOR QUICK TEST PURPOUSES ONLY)")
 
-    parser.add_argument("--wandb", default=True, action='store_true',
-                        help="False for deactivating wandb")
-    parser.add_argument('--no-wandb', dest='wandb', action='store_false')
+
+    parser.add_argument('--no-wandb', dest='wandb_active', action='store_false')
 
     parser.add_argument('--save', default='../runs/exp', type=str,
                         help='Output dir')

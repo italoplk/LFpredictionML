@@ -1,15 +1,17 @@
 
-from Params import get_args
-from DataSet import DataSet
-from Trainer import Trainer
 import wandb
+
+from DataSet import DataSet
+from Params import get_args
+from Trainer import Trainer
+
 
 def main():
     params = get_args()
 
     config_name = f"{params.model}_{params.batch_size}_{params.lr}"
 
-    if params.wandb:
+    if params.wandb_active:
         wandb.init(
             # set the wandb project where this run will be logged
             project="predictorUnet",
@@ -27,6 +29,7 @@ def main():
 
     dataset = DataSet(params)
     dataset.split()
+    print(len(dataset.list_train))
     # for lf in dataset.list_train.inner_storage:
     #     print(lf.name)
 
@@ -36,7 +39,7 @@ def main():
 
     Trainer(dataset, config_name, params)
 
-    if params.wandb:
+    if params.wandb_active:
         wandb.finish()
 
 

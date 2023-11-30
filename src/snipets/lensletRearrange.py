@@ -47,3 +47,17 @@ def multiview2lenslet(img, path_rgb, path_gscale, lf_name):
     # return reconstructed_image
     # To save the image to a new file
     # reconstructed_image.save("pillowTest.png")
+
+path='/home/machado/MultiView_8x8_RGB/'
+pathOut='/home/machado/Lenslet_8x8_RGB/'
+pathOutg='/home/machado/Lenslet_8x8_Gscale/'
+
+for classe in os.listdir(path):
+    os.makedirs(os.path.join(pathOut, classe), exist_ok=True)
+    os.makedirs(os.path.join(pathOutg, classe), exist_ok=True)
+    inner_path_rgb = os.path.join(pathOut, classe)
+    inner_path_g = os.path.join(pathOutg, classe)
+    for lf in os.listdir(os.path.join(path, classe)):
+        lf_path = os.path.join(path, classe, lf)
+        img = (Image.open(lf_path))
+        multiview2lenslet(img, inner_path_rgb, inner_path_g, lf)

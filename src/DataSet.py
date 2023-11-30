@@ -1,15 +1,16 @@
 
+import random as rand
 from glob import iglob
 from typing import List
 
 import torch
-from LightField import LightField
-# from multipledispatch import dispatch
-
-import os
-import random as rand
 from torch.utils.data import Dataset
 from torchvision.transforms import ToTensor
+
+from LightField import LightField
+
+
+# from multipledispatch import dispatch
 
 class DataSet:
     def __init__(self, params):
@@ -82,7 +83,7 @@ class LazyList(Dataset):
 
 class LensletBlockedReferencer(Dataset):
     # possible TODO: make MI_size take a tuple
-    def __init__(self, decoded, original, MI_size=13, N=32):
+    def __init__(self, decoded, original, MI_size, N=32):
         super().__init__()
         self.decoded = decoded[0, :1, :, :]
         self.original = original[0, :1, :, :]

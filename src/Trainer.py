@@ -1,14 +1,16 @@
 from argparse import Namespace
-from DataSet import DataSet, LensletBlockedReferencer
+
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
-from tqdm import tqdm
 import wandb
+from torch.utils.data import DataLoader
+
+from DataSet import DataSet, LensletBlockedReferencer
+
 
 class Trainer:
 
-    def __init__(self, dataset: DataSet, config_name : str, params : Namespace):
+    def __init__(self, dataset: DataSet, config_name: str, params: Namespace):
         self.model_name = params.model
         # TODO make loss GREAT AGAIN, nope, make it a param.
         self.loss = nn.MSELoss()
@@ -21,9 +23,9 @@ class Trainer:
         # TODO make AMERICA GREAT AGAIN, nope.... Num works be a parameter too
         # TODO test prefetch_factor and num_workers to optimize
         self.train_set = DataLoader(dataset.list_train, shuffle=True, num_workers=1,
-                                pin_memory=True, prefetch_factor=2)
+                                    pin_memory=True, prefetch_factor=2)
         self.val_set = DataLoader(dataset.list_test, shuffle=False, num_workers=8,
-                                pin_memory=True)
+                                  pin_memory=True)
         self.test_set = DataLoader(dataset.list_test, shuffle=False, num_workers=8, pin_memory=True)
 
         if torch.cuda.is_available():
@@ -39,23 +41,20 @@ class Trainer:
         self.optimizer = torch.optim.Adam(
             self.model.parameters(), lr=params.lr, betas=(0.9, 0.999))
 
-
-        for epoch in range(1, 1+params.epochs):
-            loss = self.train(epoch, 0, params.wandb)
+        for epoch in range(1, 1 + params.epochs):
+            loss = self.train(epoch, 0, params.wandb_active)
             print(f"Epoch {epoch}: {loss}")
 
-            if params.wandb:
+            if params.wandb_active:
                 wandb.log({f"MSE_era": loss})
 
-            loss = self.train(epoch, 1, params.wandb)
-            print(f"Val {epoch}: {loss}")
-            if params.wandb:
+            loss = self.train(epoch, 1, params.wandb_active)
+            print(f"Validation: {loss}")
+
+            if params.wandb_active:
                 wandb.log({f"MSE_VAL_era": loss})
 
-
-
-
-    def train(self, current_epoch, val, wandb):
+    def train(self, current_epoch, val, wandb_active):
         acc = 0
         batches_now = 0
         if val == 0:
@@ -67,10 +66,11 @@ class Trainer:
             self.model.eval()
 
         for i, data in enumerate(set):
-            #print(data.shape)
+            # print(data.shape)
             # TODO ta fazendo 4 batches por lf apenas. Tamo fazendo soh 4 crop?
             # possible TODO: make MI_Size take a tuple
-            referencer = LensletBlockedReferencer(data, data, MI_size=self.params.num_views_ver, N = self.params.predictor_size)
+            referencer = LensletBlockedReferencer(data, data, MI_size=self.params.num_views_ver,
+                                                  N=self.params.predictor_size)
             loader = DataLoader(referencer, batch_size=self.params.batch_size)
 
             for neighborhood, actual_block in loader:
@@ -78,9 +78,9 @@ class Trainer:
                 if torch.cuda.is_available():
                     neighborhood, actual_block = (neighborhood.cuda(), actual_block.cuda())
                 predicted = self.model(neighborhood)
-                predicted = predicted[:,:,-self.effective_predictor_size_v:,-self.effective_predictor_size_h:]
-                actual_block = actual_block[:,:,-self.effective_predictor_size_v:,-self.effective_predictor_size_h:]
-                loss = self.loss(predicted,actual_block)
+                predicted = predicted[:, :, -self.effective_predictor_size_v:, -self.effective_predictor_size_h:]
+                actual_block = actual_block[:, :, -self.effective_predictor_size_v:, -self.effective_predictor_size_h:]
+                loss = self.loss(predicted, actual_block)
                 if val == 0:
                     self.optimizer.zero_grad()
                     loss.backward()
@@ -89,20 +89,20 @@ class Trainer:
                 loss = loss.cpu().item()
                 acc += loss * current_batch_size
                 batches_now += current_batch_size
-                if wandb:
+                if wandb_active:
                     if val == 0:
                         wandb.log({f"Batch_MSE_era_{current_epoch}": loss})
-                        wandb.log({f"Batch_MSE_global":  loss})
+                        wandb.log({f"Batch_MSE_global": loss})
                     else:
                         wandb.log({f"Batch_MSE_VAL_global": loss})
 
-        return acc/batches_now
+        return acc / batches_now
 
 
 class ModelOracle:
     def __init__(self, model_name):
         if model_name == 'Unet2k':
-            from Models.space_only2x2_1channel_8_32x8_32 import UNetSpace
+            from Models.latest_2x2_1channel import UNetSpace
             # talvez faça mais sentido sò passar as variaveis necessarias do dataset
             self.model = UNetSpace
         elif model_name == 'Unet3k':
@@ -117,4 +117,3 @@ class ModelOracle:
             return self.model(config_name, params)
         except RuntimeError as e:
             print("Failed to import model: ", e)
-
