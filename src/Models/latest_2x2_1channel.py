@@ -43,22 +43,22 @@ class UNetSpace(nn.Module):
             ),
             nn.Sequential(  # 10, 510²
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 10, 3, stride=1), nn.PReLU(),  # 1, 512²
+                ConvTranspose2d(20, 10, 3, stride=1), nn.PReLU(),  # 1, 512²
             ),
             nn.Sequential(  # 10, 510²
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 10, 3, stride=1), nn.PReLU(),  # 1, 512²
+                ConvTranspose2d(20, 10, 3, stride=1), nn.PReLU(),  # 1, 512²
             ),
             nn.Sequential(  # 10, 510²
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 10, 3, stride=1), nn.PReLU(),  # 1, 512²
+                ConvTranspose2d(20, 10, 3, stride=1), nn.PReLU(),  # 1, 512²
             ),
             nn.Sequential(  # 10, 510²
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 1, 3, stride=1), nn.Sigmoid(),  # 1, 512²
+                ConvTranspose2d(20, 1, 3, stride=1), nn.Sigmoid(),  # 1, 512²
             ),
 
-        ], compose=lambda x, y: x+y)
+        ], compose=lambda x,y: torch.concat((x,y), axis=1))
         self.f = flat_model
         self.name = name + '.data'
         try:
