@@ -43,15 +43,15 @@ class UNetSpace(nn.Module):
             ),
             nn.Sequential(  # 10, 510²
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 1, 3, stride=1), nn.PReLU(),  # 1, 512²
+                ConvTranspose2d(10, 10, 3, stride=1), nn.PReLU(),  # 1, 512²
             ),
             nn.Sequential(  # 10, 510²
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 1, 3, stride=1), nn.PReLU(),  # 1, 512²
+                ConvTranspose2d(10, 10, 3, stride=1), nn.PReLU(),  # 1, 512²
             ),
             nn.Sequential(  # 10, 510²
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
-                ConvTranspose2d(10, 1, 3, stride=1), nn.PReLU(),  # 1, 512²
+                ConvTranspose2d(10, 10, 3, stride=1), nn.PReLU(),  # 1, 512²
             ),
             nn.Sequential(  # 10, 510²
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
