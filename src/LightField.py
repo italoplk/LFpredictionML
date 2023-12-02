@@ -1,9 +1,8 @@
-import torch
-import Params
-import numpy as np
-from PIL.Image import Image, open
-from einops import rearrange
 import os
+
+import numpy as np
+from PIL.Image import Image, open, fromarray
+from einops import rearrange
 
 
 class LightField:
@@ -53,7 +52,9 @@ class LightField:
 
             # In THEORY, shape[-1] = 3 é RGB e =1 é Gscale == luma
             image = cls.denormalize_image(image, image.itemsize * 8, image.shape[-1])
-            cv2.imwrite(f'{path}.png', image)
+            img_pil = fromarray(image)
+            img_pil.save(f'{path}.png', image)
+
 
         except RuntimeError as e:
             print("Failed to save LF: ", e.__traceback__)

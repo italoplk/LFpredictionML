@@ -11,6 +11,13 @@ def main():
 
     config_name = f"{params.run_name}{params.model}_{params.batch_size}_{params.lr}"
 
+
+
+
+    dataset = DataSet(params)
+    dataset.split()
+    print(len(dataset.list_train))
+
     if params.wandb_active:
         wandb.init(
             # set the wandb project where this run will be logged
@@ -22,14 +29,11 @@ def main():
                 "architecture": f"{params.model}",
                 "dataset": params.dataset_name,
                 "epochs": params.epochs,
-                "name": f"{config_name}"
+                "name": f"{config_name}",
+                "Training Size": f"{len(dataset.list_train)}",
+                "Test Size": f"{len(dataset.list_test)}",
             }
         )
-
-
-    dataset = DataSet(params)
-    dataset.split()
-    print(len(dataset.list_train))
     # for lf in dataset.list_train.inner_storage:
     #     print(lf.name)
 

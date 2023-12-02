@@ -3,8 +3,9 @@ from argparse import Namespace
 
 import torch
 import torch.nn as nn
-from Models.unetlike import UNetLike
 from torch.nn import Conv2d, ConvTranspose2d
+
+from unetlike import UNetLike
 
 
 class UNetSpace(nn.Module):
@@ -12,7 +13,6 @@ class UNetSpace(nn.Module):
         super().__init__()
         s, t, u, v = (params.num_views_ver, params.num_views_hor, params.predictor_size, params.predictor_size)
 
-        print(s, t, u, v)
 
 
         flat_model = UNetLike([  # 18, 512²
@@ -58,7 +58,7 @@ class UNetSpace(nn.Module):
                 ConvTranspose2d(20, 1, 3, stride=1), nn.Sigmoid(),  # 1, 512²
             ),
 
-        ], compose=lambda x,y: torch.concat((x,y), axis=1))
+        ], compose=lambda x,y: torch.cat([x,y], dim=1))
         self.f = flat_model
         self.name = name + '.data'
         try:
@@ -79,7 +79,7 @@ params = Namespace()
 dims = (8,8,64,64)
 dims_out = (8,8,32,32)
 (params.num_views_ver, params.num_views_hor, params.predictor_size, params.predictor_size) = dims_out
-print(params)
+# print(params)
 model = UNetSpace("unet_space", params)
 model.eval()
 zeros = torch.zeros(1, 1, dims[0]*dims[2], dims[1]*dims[3])
@@ -88,6 +88,6 @@ lossf = nn.MSELoss()
 with torch.no_grad():
     x = model(zeros)
     x = x[:,:,-dims_out[0]*dims_out[2]:,-dims_out[1]*dims_out[3]:]
-    print(x.shape)
+    # print(x.shape)
     print(lossf(zeros_t, x))
 

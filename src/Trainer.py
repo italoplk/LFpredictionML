@@ -26,7 +26,8 @@ class Trainer:
                                     pin_memory=True, prefetch_factor=2)
         self.val_set = DataLoader(dataset.list_test, shuffle=False, num_workers=8,
                                   pin_memory=True)
-        self.test_set = DataLoader(dataset.list_test, shuffle=False, num_workers=8, pin_memory=True)
+        self.test_set = DataLoader(dataset.list_test, shuffle=False, num_workers=8,
+                                   pin_memory=True)
 
         if torch.cuda.is_available():
             self.model.cuda()
@@ -46,6 +47,7 @@ class Trainer:
             print(f"Epoch {epoch}: {loss}")
 
             if params.wandb_active:
+                wandb.log({f"Epoch": epoch})
                 wandb.log({f"MSE_era": loss})
 
             loss = self.train(epoch, 1, params.wandb_active)
@@ -53,6 +55,8 @@ class Trainer:
 
             if params.wandb_active:
                 wandb.log({f"MSE_VAL_era": loss})
+
+            torch.save(self.model.state_dict(), f"/home/machado/saved_models/{config_name}.pth.tar")
 
     def train(self, current_epoch, val, wandb_active):
         acc = 0
@@ -94,7 +98,7 @@ class Trainer:
                         wandb.log({f"Batch_MSE_era_{current_epoch}": loss})
                         wandb.log({f"Batch_MSE_global": loss})
                     else:
-                        wandb.log({f"Batch_MSE_VAL_global": loss})
+                        wandb.log({f"Batch_MSE_VAL_global_{current_epoch}": loss})
 
         return acc / batches_now
 
