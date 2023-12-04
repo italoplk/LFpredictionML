@@ -1,4 +1,5 @@
 from argparse import Namespace
+import os.path
 
 import torch
 import torch.nn as nn
@@ -28,6 +29,9 @@ class Trainer:
                                   pin_memory=True)
         self.test_set = DataLoader(dataset.list_test, shuffle=False, num_workers=8,
                                    pin_memory=True)
+        
+        if not self.params.path_weights:
+            print("Warning: path_weights not set!")
 
         if torch.cuda.is_available():
             self.model.cuda()
@@ -55,8 +59,8 @@ class Trainer:
 
             if params.wandb_active:
                 wandb.log({f"MSE_VAL_era": loss})
-
-            torch.save(self.model.state_dict(), f"/home/machado/saved_models/{config_name}.pth.tar")
+            if self.params.path_weights:
+                torch.save(self.model.state_dict(), self.params.path_weights)
 
     def train(self, current_epoch, val, wandb_active):
         acc = 0
@@ -118,6 +122,9 @@ class ModelOracle:
 
     def get_model(self, config_name, params):
         try:
-            return self.model(config_name, params)
+            model = self.model(config_name, params)
+            if (params.path_weights != None) and os.path.exists(params.path_weights):
+                model.load_state_dict(torch.load(params.path_weights))
+            return model
         except RuntimeError as e:
             print("Failed to import model: ", e)

@@ -58,7 +58,7 @@ def get_args():
                         help='path to latest checkpoint (default: none)')
 
     parser.add_argument('--model', default='Unet2k', type=str)
-
+    parser.add_argument('--path-weights', default=None, type=str, help="Where to put/read from weights")
 
 
 
