@@ -113,7 +113,7 @@ class ModelOracle:
             from Models.latest_2x2_1channel import UNetSpace
             # talvez faça mais sentido sò passar as variaveis necessarias do dataset
             self.model = UNetSpace
-        if model_name == 'Unet2k_space':
+        elif model_name == 'Unet2k_space':
             from Models.latest_2x2_1channel_space import UNetSpace
             # talvez faça mais sentido sò passar as variaveis necessarias do dataset
             self.model = UNetSpace
@@ -121,7 +121,7 @@ class ModelOracle:
             from Models.space_model_8_small_kernels import UNetSpace
             self.model = UNetSpace
         else:
-            print("Model not Found.")
+            print(f"""Model not Found "{model_name}".""")
             exit(404)
 
     def get_model(self, config_name, params):
