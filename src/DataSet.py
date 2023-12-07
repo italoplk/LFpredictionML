@@ -19,7 +19,8 @@ class DataSet:
         self.resol_ver: params.resol_ver
         self.resol_hor: params.resol_hor
         self.bit_depth = params.bit_depth
-        self.path = params.dataset_path
+        self.dataset_path = params.dataset_path
+        self.test_path = params.test_path
         self.limit_train = params.limit_train
         self.list_lfs = LazyList([], transforms = [ToTensor()])
         self.list_train = LazyList([], transforms = [ToTensor()])
@@ -33,18 +34,20 @@ class DataSet:
             exit(11)
 
         if len(self.list_lfs) == 0:
-            print("Failed to find LFs at path: ", self.path)
+            print("Failed to find LFs at path: ", self.dataset_path)
             exit(12)
 
 
 
     # TODO add new dataset variables at __str__
     def __str__(self):
-        return ', '.join([self.path])
+        return ', '.join([self.dataset_path])
 
     def load_paths(self):
-        for lf_path in iglob(f"{self.path}/*/*"):
+        for lf_path in iglob(f"{self.dataset_path}/*/*"):
             self.list_lfs.append(LightField(lf_path))
+        for lf_path in iglob(f"{self.test_path}/*"):
+            self.list_test.append(LightField(lf_path))
 
 
     @classmethod
