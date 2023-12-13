@@ -117,6 +117,10 @@ class ModelOracle:
             from Models.latest_2x2_1channel_space import UNetSpace
             # talvez faça mais sentido sò passar as variaveis necessarias do dataset
             self.model = UNetSpace
+        elif model_name == 'Unet2k_space_noskip':
+            from Models.latest_2x2_1channel_space_noskip import UNetSpace
+            # talvez faça mais sentido sò passar as variaveis necessarias do dataset
+            self.model = UNetSpace
         elif model_name == 'Unet3k':
             from Models.space_model_8_small_kernels import UNetSpace
             self.model = UNetSpace
