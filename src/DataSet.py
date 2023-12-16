@@ -111,7 +111,7 @@ class LensletBlockedReferencer(Dataset):
         expected_block = self.original[:, :, :, i * self.N : (i+2) * self.N, j * self.N : (j+2) * self.N].to(neighborhood)"""
         neighborhood = torch.zeros(section.shape[0], *section.shape[1:], dtype=torch.float32)
         neighborhood[:, :, :] = section.to(neighborhood)
-        #neighborhood[:, self.N:, self.N:] = neighborhood[:, :self.N, :self.N].flip((-1,-2))
+        neighborhood[:, self.N:, self.N:] = 0
         expected_block = self.original[:, i * self.N : (i+2) * self.N, j * self.N : (j+2) * self.N].to(neighborhood)
         #print(neighborhood.shape)
         return neighborhood, expected_block
